@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#F2EFE6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#141412" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,6 +29,8 @@
   html { height: 100%; }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  button { touch-action: manipulation; }
   body { margin: 0; height: 100%; font-family: var(--font); background: var(--bg); color: var(--fg); transition: background .45s ease, color .45s ease; -webkit-font-smoothing: antialiased; overflow: hidden; }
   @media (prefers-reduced-motion: reduce) { body { transition: none; } * { animation: none !important; } }
   .app { height: 100%; display: flex; flex-direction: column; max-width: 560px; margin: 0 auto; padding-block: 16px; padding-inline: 20px; }
@@ -456,6 +458,7 @@
   renderIntro();
 })();
 </script>
-<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
+<script>document.addEventListener("gesturestart", e => e.preventDefault()); let lastTap = 0; document.addEventListener("touchend", e => { const now = Date.now(); if (now - lastTap < 350) e.preventDefault(); lastTap = now; }, { passive: false });
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
 </body>
 </html>
