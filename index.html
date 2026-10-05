@@ -111,19 +111,19 @@
 
   <section class="intro" id="intro">
     <h1>Forza in<br>pausa pranzo</h1>
-    <p>Lunedì e venerdì, 60 minuti netti. Due sessioni diverse che insieme coprono tutto, con il lavoro sui femorali in ogni seduta: sono loro che tengono a bada l'iperestensione del ginocchio sinistro. Mercoledì corri, quindi i carichi pesanti sulle gambe stanno lontani da quel giorno.</p>
+    <p>Lunedì e venerdì, 60 minuti netti. Due sessioni che insieme coprono tutto il corpo, metà gambe e metà busto, con i femorali in ogni seduta: sono loro che tengono a bada l'iperestensione del ginocchio sinistro. Mercoledì corri, quindi i carichi pesanti sulle gambe stanno lontani da quel giorno.</p>
 
     <div>
       <p class="lbl">Oggi faccio</p>
       <div class="days" role="group" aria-label="Sessione">
         <button class="day" data-day="A" aria-pressed="true">
           <i class="dot" style="background:var(--lift-a)"></i>
-          <div><strong>A · Lunedì</strong><span>Gambe davanti e spinta: squat, panca, leg curl, affondi, spalle, polpacci.</span></div>
+          <div><strong>A · Lunedì</strong><span>Squat, leg curl, panca piana e inclinata, spalle, polpacci.</span></div>
           <em id="lastA">—</em>
         </button>
         <button class="day" data-day="B" aria-pressed="false">
           <i class="dot" style="background:var(--lift-b)"></i>
-          <div><strong>B · Venerdì</strong><span>Catena posteriore e tirata: stacco rumeno, trazioni, nordic curl, bulgarian, rematore, core.</span></div>
+          <div><strong>B · Venerdì</strong><span>Stacco rumeno, trazioni, nordic curl, curl bicipiti, rematore, core.</span></div>
           <em id="lastB">—</em>
         </button>
       </div>
@@ -204,9 +204,8 @@
     { id: "bench", name: "Panca piana", sets: 4, lo: 5, hi: 6, inc: 2.5, rest: 120, start: 55,
       cue: "Scapole strette, piedi a terra. La sbarra tocca il petto senza rimbalzare.",
       ramp: "Prima: bilanciere vuoto ×8, poi 60% ×4." },
-    { id: "revlunge", name: "Affondi inversi con manubri", sets: 3, lo: 8, hi: 10, inc: 2, rest: 75, start: 12,
-      cue: "Reps per gamba. Passo indietro, ginocchio dietro sfiora terra, torna spingendo con la gamba davanti.",
-      knee: "Nel tornare in piedi sulla sinistra non spingere il ginocchio indietro per chiudere: fermati un filo prima." },
+    { id: "incline", name: "Panca inclinata con manubri", sets: 3, lo: 8, hi: 10, inc: 2, rest: 90, start: 20,
+      cue: "Panca a 30°, manubri che scendono ai lati del petto, gomiti a 45°. Peso = un manubrio." },
     { id: "ohp", name: "Overhead press con manubri", sets: 3, lo: 8, hi: 10, inc: 2, rest: 90, start: 14,
       cue: "In piedi, addome contenuto, spingi sopra la testa e porta i manubri un po' in avanti in alto.",
       knee: "In piedi le ginocchia restano morbide anche qui, non le bloccare per fare leva." },
@@ -224,9 +223,9 @@
     { id: "nordic", name: "Nordic curl eccentrico", sets: 3, lo: 4, hi: 6, inc: 0, rest: 90, start: 0,
       cue: "Caviglie bloccate, corpo dritto dalle ginocchia alla testa. Scendi più lento che puoi, 4–5 s, poi risali aiutandoti con le mani. Peso: niente da scrivere.",
       knee: "Questo è l'esercizio che più di tutti insegna ai femorali a frenare il ginocchio. Quando arrivi a 6 lente e controllate, rallenta ancora la discesa invece di aggiungere reps." },
-    { id: "bulg", name: "Bulgarian split squat", sets: 3, lo: 8, hi: 10, inc: 2, rest: 75, start: 12,
-      cue: "Reps per gamba, manubri in mano, piede dietro sulla panca. Busto leggermente inclinato in avanti.",
-      knee: "Parti dalla sinistra. In alto non chiudere il ginocchio: resta un dito prima del blocco." },
+    { id: "curl", name: "Curl con bilanciere", sets: 3, lo: 8, hi: 10, inc: 2.5, rest: 60, start: 25,
+      cue: "Gomiti fermi ai fianchi, niente slancio di schiena. 2 s in discesa.",
+      knee: "In piedi, ginocchia morbide: è il posto classico dove si bloccano indietro senza accorgersene." },
     { id: "row", name: "Rematore con manubrio", sets: 3, lo: 10, hi: 12, inc: 2, rest: 60, start: 22,
       cue: "Reps per lato, mano e ginocchio sulla panca. Gomito che sfiora il fianco, 1 s di tenuta in alto." },
     { id: "pallof", name: "Pallof press al cavo", sets: 3, lo: 10, hi: 12, inc: 2.5, rest: 45, start: 15,
@@ -234,7 +233,7 @@
       knee: "In piedi, ginocchia morbide, peso al centro del piede." },
   ];
   const DAYS = {
-    A: { name: "Sessione A", sub: "Gambe davanti e spinta", warm: WARM_A, lifts: LIFTS_A, color: "var(--lift-a)", fg: "#F2EFE6" },
+    A: { name: "Sessione A", sub: "Gambe e spinta", warm: WARM_A, lifts: LIFTS_A, color: "var(--lift-a)", fg: "#F2EFE6" },
     B: { name: "Sessione B", sub: "Catena posteriore e tirata", warm: WARM_B, lifts: LIFTS_B, color: "var(--lift-b)", fg: "#F2EFE6" },
   };
 
