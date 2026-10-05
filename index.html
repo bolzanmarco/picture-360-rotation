@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2EFE6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141412" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Forza">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Forza in pausa pranzo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap" rel="stylesheet">
+<style>
+  :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  /* Layout: one screen per momento. Intro con i due giorni, sessione a tutto schermo che cambia colore per fase. */
+  :root {
+    --ink: #101010; --paper: #F2EFE6; --mute: #6B6760; --line: #101010;
+    --warm: #FFD23F; --lift-a: #2B45FF; --lift-b: #B5121B; --rest: #9CF2C2; --done: #101010;
+    --bg: var(--paper); --fg: var(--ink);
+    --font: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink: #F2EFE6; --paper: #141412; --mute: #A7A399; --line: #F2EFE6; --done: #F2EFE6; color-scheme: dark; } }
+  :root[data-theme="dark"] { --ink: #F2EFE6; --paper: #141412; --mute: #A7A399; --line: #F2EFE6; --done: #F2EFE6; color-scheme: dark; }
+  html { height: 100%; }
+  * { box-sizing: border-box; }
+  body { margin: 0; height: 100%; font-family: var(--font); background: var(--bg); color: var(--fg); transition: background .45s ease, color .45s ease; -webkit-font-smoothing: antialiased; overflow: hidden; }
+  @media (prefers-reduced-motion: reduce) { body { transition: none; } * { animation: none !important; } }
+  .app { height: 100%; display: flex; flex-direction: column; max-width: 560px; margin: 0 auto; padding-block: 16px; padding-inline: 20px; }
+
+  .intro { display: flex; flex-direction: column; height: 100%; gap: 16px; overflow-y: auto; }
+  .intro h1 { font-size: clamp(40px, 12vw, 64px); line-height: .92; font-weight: 800; letter-spacing: -.03em; margin: 8px 0 0; font-variation-settings: "opsz" 96; text-wrap: balance; }
+  .intro p { margin: 0; font-size: 16px; line-height: 1.4; max-width: 38ch; }
+  .lbl { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 8px; opacity: .75; }
+  .days { display: grid; gap: 10px; }
+  .day { border: 2px solid var(--line); border-radius: 16px; padding: 14px; text-align: left; background: transparent; color: var(--ink); font: inherit; cursor: pointer; display: grid; grid-template-columns: 16px 1fr auto; gap: 12px; align-items: start; }
+  .day[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .day .dot { width: 16px; height: 16px; border-radius: 50%; margin-top: 4px; border: 2px solid currentColor; }
+  .day strong { display: block; font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+  .day span { font-size: 14px; line-height: 1.35; opacity: .85; }
+  .day em { font-style: normal; font-weight: 700; font-size: 14px; white-space: nowrap; opacity: .85; }
+  .list { font-size: 14px; line-height: 1.45; margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+  .list li { display: grid; grid-template-columns: 1fr auto; gap: 10px; font-variant-numeric: tabular-nums; }
+  .list li b { font-weight: 700; }
+  .list li i { font-style: normal; opacity: .75; white-space: nowrap; }
+  .note { background: var(--ink); color: var(--paper); border-radius: 14px; padding: 12px 14px; font-size: 14px; line-height: 1.4; }
+  .note b { font-weight: 800; }
+  .settings { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { border: 2px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 8px 14px; font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .start { margin-top: auto; padding-top: 8px; }
+  .btn { font: inherit; font-weight: 700; border: none; cursor: pointer; border-radius: 999px; padding: 18px 22px; font-size: 20px; width: 100%; background: var(--ink); color: var(--paper); }
+  .btn:focus-visible, .chip:focus-visible, .ctl:focus-visible, .day:focus-visible, .step:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+
+  .session { display: none; height: 100%; flex-direction: column; }
+  .session.active { display: flex; }
+  .segments { display: flex; gap: 2px; height: 6px; }
+  .segments i { flex: 1; border-radius: 3px; background: currentColor; opacity: .18; }
+  .segments i.past { opacity: .55; }
+  .segments i.now { opacity: 1; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; font-size: 15px; font-weight: 600; gap: 10px; }
+  .top .phase { font-weight: 800; }
+  .main { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; min-height: 0; overflow-y: auto; }
+
+  .time { font-size: clamp(84px, 32vw, 150px); line-height: .9; font-weight: 800; letter-spacing: -.05em; font-variant-numeric: tabular-nums; font-variation-settings: "opsz" 96; margin: 0 0 0 -4px; }
+  .time.last { animation: pulse .5s ease-in-out; }
+  @keyframes pulse { 0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); } }
+  .single { font-size: clamp(30px, 9vw, 44px); line-height: 1; font-weight: 800; letter-spacing: -.025em; text-wrap: balance; }
+  .single small { display: block; font-size: 16px; font-weight: 500; letter-spacing: 0; margin-top: 8px; line-height: 1.35; }
+
+  .ex { font-size: clamp(32px, 10vw, 50px); line-height: .98; font-weight: 800; letter-spacing: -.03em; text-wrap: balance; }
+  .scheme { font-size: 18px; font-weight: 700; margin-top: 6px; }
+  .cue { font-size: 15px; line-height: 1.35; margin-top: 8px; opacity: .9; max-width: 40ch; }
+  .cue.knee { padding-left: 10px; border-left: 3px solid currentColor; }
+  .set { font-size: 15px; font-weight: 700; margin-top: 12px; display: flex; gap: 8px; align-items: center; }
+  .set .pips { display: flex; gap: 5px; }
+  .set .pips i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid currentColor; }
+  .set .pips i.done { background: currentColor; }
+  .steppers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .stepper { border: 2px solid currentColor; border-radius: 14px; padding: 8px 10px; display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; }
+  .stepper .k { grid-column: 1 / -1; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .75; margin-bottom: 2px; }
+  .stepper .v { text-align: center; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .stepper .v small { font-size: 13px; font-weight: 600; margin-left: 2px; }
+  .step { font: inherit; font-size: 22px; font-weight: 700; border: none; background: transparent; color: inherit; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; }
+  .step:active { background: currentColor; }
+  .last { font-size: 13px; opacity: .75; margin-top: 8px; }
+
+  .next { font-size: 14px; line-height: 1.3; opacity: .85; padding-top: 10px; border-top: 2px solid currentColor; margin-top: 8px; }
+  .next b { font-weight: 700; }
+  .controls { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 10px; margin-top: 12px; }
+  .ctl { font: inherit; font-weight: 700; font-size: 17px; border: 2px solid currentColor; background: transparent; color: inherit; border-radius: 999px; padding: 15px 8px; cursor: pointer; }
+  .ctl.primary { background: currentColor; }
+  .ctl.primary span { color: var(--bg); }
+
+  .finish { text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 14px; overflow-y: auto; }
+  .finish h2 { font-size: clamp(44px, 14vw, 80px); line-height: .9; font-weight: 800; letter-spacing: -.03em; margin: 0; }
+  .finish p { font-size: 17px; margin: 0; }
+  .recap { text-align: left; display: grid; gap: 6px; font-size: 14px; line-height: 1.4; border: 2px solid currentColor; border-radius: 14px; padding: 12px 14px; }
+  .recap div { display: grid; grid-template-columns: 1fr auto; gap: 10px; font-variant-numeric: tabular-nums; }
+  .recap .up { font-weight: 800; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <section class="intro" id="intro">
+    <h1>Forza in<br>pausa pranzo</h1>
+    <p>Lunedì e venerdì, 60 minuti netti. Due sessioni diverse che insieme coprono tutto, con il lavoro sui femorali in ogni seduta: sono loro che tengono a bada l'iperestensione del ginocchio sinistro. Mercoledì corri, quindi i carichi pesanti sulle gambe stanno lontani da quel giorno.</p>
+
+    <div>
+      <p class="lbl">Oggi faccio</p>
+      <div class="days" role="group" aria-label="Sessione">
+        <button class="day" data-day="A" aria-pressed="true">
+          <i class="dot" style="background:var(--lift-a)"></i>
+          <div><strong>A · Lunedì</strong><span>Gambe davanti e spinta: squat, panca, leg curl, affondi, spalle, polpacci.</span></div>
+          <em id="lastA">—</em>
+        </button>
+        <button class="day" data-day="B" aria-pressed="false">
+          <i class="dot" style="background:var(--lift-b)"></i>
+          <div><strong>B · Venerdì</strong><span>Catena posteriore e tirata: stacco rumeno, trazioni, nordic curl, bulgarian, rematore, core.</span></div>
+          <em id="lastB">—</em>
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <p class="lbl">Come funziona</p>
+      <ul class="list" id="preview"></ul>
+    </div>
+
+    <div class="note"><b>Progressione.</b> Ogni esercizio ha un intervallo di ripetizioni. Se in tutte le serie arrivi al numero più alto, la volta dopo l'app ti propone qualche chilo in più. Se non ci arrivi, tieni il peso. I pesi restano salvati su questo telefono.<br><br><b>Ginocchio sinistro.</b> Regola unica, vale ovunque: in piedi il ginocchio resta morbido, mai bloccato indietro. Le righe con la barra a sinistra sono i cue per lui.</div>
+
+    <div>
+      <p class="lbl">Suoni</p>
+      <div class="settings" role="group" aria-label="Suoni">
+        <button class="chip" data-sound="1" aria-pressed="true">Con bip</button>
+        <button class="chip" data-sound="0" aria-pressed="false">Silenzioso</button>
+      </div>
+    </div>
+
+    <div class="start"><button class="btn" id="startBtn">Inizia la sessione A</button></div>
+  </section>
+
+  <section class="session" id="session" aria-live="polite">
+    <div class="segments" id="segments"></div>
+    <div class="top"><span class="phase" id="phase"></span><span id="counter"></span></div>
+    <div class="main" id="main"></div>
+    <div class="next" id="next"></div>
+    <div class="controls">
+      <button class="ctl" id="prevBtn" aria-label="Indietro">←</button>
+      <button class="ctl primary" id="mainBtn"><span>Serie fatta</span></button>
+      <button class="ctl" id="nextBtn" aria-label="Avanti">→</button>
+    </div>
+  </section>
+
+  <section class="session" id="finish">
+    <div class="finish">
+      <h2 id="finishTitle">Fatto.</h2>
+      <p id="finishText"></p>
+      <div class="recap" id="recap"></div>
+      <button class="btn" id="againBtn" style="margin-top:12px">Torna all'inizio</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  // ---------- Programma ----------
+  // Riscaldamento a tempo (secondi). Il terzo campo "knee" marca i cue per il ginocchio.
+  const WARM_A = [
+    ["Bike o vogatore", "Ritmo facile, 3 minuti. Serve a scaldare, non a sudare.", 180],
+    ["Ponte glutei a una gamba", "Supino, spingi col tallone, 20 s per lato. Ginocchio a 90°, non di più.", 40],
+    ["Hamstring walkout", "Dal ponte, cammina coi talloni in avanti e indietro. Senti i femorali.", 40, true],
+    ["Squat a corpo libero", "Lento, 3 s in discesa. In alto fermati prima di bloccare le ginocchia.", 40, true],
+    ["Affondi camminati", "Busto alto, ginocchio dietro sfiora terra.", 40],
+    ["Apertura spalle con elastico o bastone", "Dislocazioni lente, presa larga.", 40],
+    ["Equilibrio sinistro", "In piedi sulla sinistra, ginocchio appena piegato, 30 s. Poi destra.", 60, true],
+  ];
+  const WARM_B = [
+    ["Bike o vogatore", "Ritmo facile, 3 minuti.", 180],
+    ["Good morning a corpo libero", "Mani dietro la nuca, anche indietro, schiena lunga. Senti tirare i femorali.", 40, true],
+    ["Hamstring walkout", "Dal ponte, cammina coi talloni avanti e indietro.", 40, true],
+    ["Dead hang", "Appeso rilassato, spalle che si allungano.", 30],
+    ["Scapular pull-up", "Da appeso, solo scapole: giù e su.", 30],
+    ["Affondi laterali", "Alterna. Il ginocchio che piega resta sopra il piede.", 40],
+    ["Equilibrio sinistro", "In piedi sulla sinistra, ginocchio morbido, 30 s. Poi destra.", 60, true],
+  ];
+
+  // Esercizi di forza: id, nome, serie, reps min, reps max, incremento kg, recupero s, peso iniziale, cue, cue ginocchio, note serie di avvicinamento
+  const LIFTS_A = [
+    { id: "squat", name: "Back squat", sets: 4, lo: 5, hi: 6, inc: 2.5, rest: 150, start: 60,
+      cue: "Bilanciere sulle spalle, piedi poco più larghi delle anche. Scendi almeno al parallelo.",
+      knee: "In alto fermati con le ginocchia leggermente piegate. Il peso resta sul centro del piede, mai sui talloni con le ginocchia indietro.",
+      ramp: "Prima: bilanciere vuoto ×8, poi 50% ×5, poi 75% ×3." },
+    { id: "legcurl", name: "Leg curl seduto", sets: 3, lo: 8, hi: 10, inc: 2.5, rest: 90, start: 35,
+      cue: "Il pezzo più importante del lunedì. 3 secondi nel ritorno, fermati un attimo in chiusura.",
+      knee: "Qui lavori proprio la forza che tiene il ginocchio sinistro. Se la sinistra cede prima, fai l'ultima serie solo con lei." },
+    { id: "bench", name: "Panca piana", sets: 4, lo: 5, hi: 6, inc: 2.5, rest: 120, start: 55,
+      cue: "Scapole strette, piedi a terra. La sbarra tocca il petto senza rimbalzare.",
+      ramp: "Prima: bilanciere vuoto ×8, poi 60% ×4." },
+    { id: "revlunge", name: "Affondi inversi con manubri", sets: 3, lo: 8, hi: 10, inc: 2, rest: 75, start: 12,
+      cue: "Reps per gamba. Passo indietro, ginocchio dietro sfiora terra, torna spingendo con la gamba davanti.",
+      knee: "Nel tornare in piedi sulla sinistra non spingere il ginocchio indietro per chiudere: fermati un filo prima." },
+    { id: "ohp", name: "Overhead press con manubri", sets: 3, lo: 8, hi: 10, inc: 2, rest: 90, start: 14,
+      cue: "In piedi, addome contenuto, spingi sopra la testa e porta i manubri un po' in avanti in alto.",
+      knee: "In piedi le ginocchia restano morbide anche qui, non le bloccare per fare leva." },
+    { id: "calf", name: "Polpacci in piedi", sets: 3, lo: 10, hi: 12, inc: 5, rest: 60, start: 40,
+      cue: "Discesa lenta sotto il gradino, 2 s di tenuta in alto.",
+      knee: "Il gastrocnemio passa dietro al ginocchio e aiuta a frenare l'iperestensione: non è un esercizio da saltare." },
+  ];
+  const LIFTS_B = [
+    { id: "rdl", name: "Stacco rumeno", sets: 4, lo: 6, hi: 8, inc: 2.5, rest: 150, start: 70,
+      cue: "Bilanciere a contatto con le gambe, anche indietro, schiena lunga. Scendi finché i femorali tirano, poi risali di anche.",
+      knee: "Ginocchia appena piegate per tutta la discesa e tali restano. In alto chiudi coi glutei, non spingendo le ginocchia indietro.",
+      ramp: "Prima: bilanciere vuoto ×8, poi 60% ×5." },
+    { id: "pullup", name: "Trazioni", sets: 4, lo: 5, hi: 8, inc: 2.5, rest: 120, start: 0,
+      cue: "Peso = zavorra. Parti da zero: presa prona, mento sopra la sbarra, scendi fino a braccia tese. Se non arrivi a 5, usa l'elastico e scrivi 0." },
+    { id: "nordic", name: "Nordic curl eccentrico", sets: 3, lo: 4, hi: 6, inc: 0, rest: 90, start: 0,
+      cue: "Caviglie bloccate, corpo dritto dalle ginocchia alla testa. Scendi più lento che puoi, 4–5 s, poi risali aiutandoti con le mani. Peso: niente da scrivere.",
+      knee: "Questo è l'esercizio che più di tutti insegna ai femorali a frenare il ginocchio. Quando arrivi a 6 lente e controllate, rallenta ancora la discesa invece di aggiungere reps." },
+    { id: "bulg", name: "Bulgarian split squat", sets: 3, lo: 8, hi: 10, inc: 2, rest: 75, start: 12,
+      cue: "Reps per gamba, manubri in mano, piede dietro sulla panca. Busto leggermente inclinato in avanti.",
+      knee: "Parti dalla sinistra. In alto non chiudere il ginocchio: resta un dito prima del blocco." },
+    { id: "row", name: "Rematore con manubrio", sets: 3, lo: 10, hi: 12, inc: 2, rest: 60, start: 22,
+      cue: "Reps per lato, mano e ginocchio sulla panca. Gomito che sfiora il fianco, 1 s di tenuta in alto." },
+    { id: "pallof", name: "Pallof press al cavo", sets: 3, lo: 10, hi: 12, inc: 2.5, rest: 45, start: 15,
+      cue: "Reps per lato. Cavo all'altezza del petto, spingi le mani avanti e resisti alla rotazione.",
+      knee: "In piedi, ginocchia morbide, peso al centro del piede." },
+  ];
+  const DAYS = {
+    A: { name: "Sessione A", sub: "Gambe davanti e spinta", warm: WARM_A, lifts: LIFTS_A, color: "var(--lift-a)", fg: "#F2EFE6" },
+    B: { name: "Sessione B", sub: "Catena posteriore e tirata", warm: WARM_B, lifts: LIFTS_B, color: "var(--lift-b)", fg: "#F2EFE6" },
+  };
+
+  // ---------- Stato persistente ----------
+  const KEY = "forza-pranzo-v1";
+  let store = { weights: {}, suggest: {}, last: {}, history: [] };
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.weights) store = { ...store, ...s }; } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} };
+
+  let day = "A", sound = true;
+  let plan = [], idx = 0, running = false, tick = null, lastBeep = -1, endAt = 0, remaining = 0;
+  let log = {}; // id -> [{w, r}]
+
+  const $ = id => document.getElementById(id);
+  const fmtW = w => w === 0 ? "0" : (Math.round(w * 4) / 4).toString().replace(".", ",");
+  const fmtDate = iso => { if (!iso) return "—"; const d = new Date(iso); return d.toLocaleDateString("it-IT", { day: "numeric", month: "short" }); };
+
+  // ---------- Costruzione piano ----------
+  function build() {
+    const D = DAYS[day]; plan = [];
+    D.warm.forEach(w => plan.push({ type: "warm", phase: "Riscaldamento", name: w[0], cue: w[1], dur: w[2], knee: !!w[3] }));
+    D.lifts.forEach((L, li) => {
+      if (L.ramp) plan.push({ type: "lift", phase: `${li + 1} · ${L.name}`, name: "Serie di avvicinamento", cue: L.ramp, ramp: true, lift: L });
+      for (let s = 1; s <= L.sets; s++) {
+        plan.push({ type: "lift", phase: `${li + 1} di ${D.lifts.length}`, lift: L, set: s });
+        const isLast = s === L.sets, nextL = D.lifts[li + 1];
+        const rest = isLast ? (nextL ? Math.min(L.rest, 90) : 0) : L.rest;
+        if (rest > 0) plan.push({ type: "rest", phase: isLast ? "Cambio esercizio" : `${L.name}`, name: "Recupero", cue: isLast && nextL ? `Prepara: ${nextL.name}.` : `Poi serie ${s + 1} di ${L.sets}.`, dur: rest });
+      }
+    });
+    log = {};
+  }
+  const minutes = () => {
+    const D = DAYS[day];
+    let s = D.warm.reduce((a, w) => a + w[2], 0);
+    D.lifts.forEach((L, i) => { s += (L.ramp ? 150 : 0) + L.sets * 45 + (L.sets - 1) * L.rest + (i < D.lifts.length - 1 ? Math.min(L.rest, 90) : 0); });
+    return Math.round(s / 60);
+  };
+  const weightFor = L => store.suggest[L.id] ?? store.weights[L.id] ?? L.start;
+
+  // ---------- Intro ----------
+  function renderIntro() {
+    const D = DAYS[day];
+    $("preview").innerHTML = [
+      `<li><b>Riscaldamento</b><i>${Math.round(D.warm.reduce((a, w) => a + w[2], 0) / 60)} min, a tempo</i></li>`,
+      ...D.lifts.map(L => `<li><b>${L.name}</b><i>${L.sets}×${L.lo}–${L.hi} · ${L.inc ? fmtW(weightFor(L)) + " kg" : "corpo libero"}</i></li>`),
+      `<li><b>Totale stimato</b><i>${minutes()} min</i></li>`
+    ].join("");
+    $("startBtn").textContent = `Inizia la sessione ${day}`;
+    $("lastA").textContent = fmtDate(store.last.A); $("lastB").textContent = fmtDate(store.last.B);
+  }
+  document.querySelectorAll("[data-day]").forEach(b => b.addEventListener("click", () => {
+    day = b.dataset.day;
+    document.querySelectorAll("[data-day]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    renderIntro();
+  }));
+  document.querySelectorAll("[data-sound]").forEach(b => b.addEventListener("click", () => {
+    sound = b.dataset.sound === "1";
+    document.querySelectorAll("[data-sound]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  }));
+
+  // ---------- Sessione ----------
+  const colors = { warm: "var(--warm)", rest: "var(--rest)" };
+  const fgs = { warm: "#101010", rest: "#101010" };
+  let curW = 0, curR = 0;
+
+  function render() {
+    const s = plan[idx], D = DAYS[day];
+    const bg = s.type === "lift" ? D.color : colors[s.type];
+    const fg = s.type === "lift" ? D.fg : fgs[s.type];
+    document.body.style.setProperty("--bg", bg); document.body.style.setProperty("--fg", fg);
+    $("phase").textContent = s.phase; $("counter").textContent = `${idx + 1} / ${plan.length}`;
+    [...$("segments").children].forEach((el, i) => { el.className = i < idx ? "past" : i === idx ? "now" : ""; });
+    const n = plan[idx + 1];
+    const label = x => !x ? "" : x.type === "lift" && x.set ? `${x.lift.name}, serie ${x.set}` : x.name;
+    $("next").innerHTML = n ? `Dopo: <b>${label(n)}</b>${n.dur ? ` · ${n.dur} s` : ""}` : "Ultimo passaggio";
+
+    if (s.type === "warm" || s.type === "rest") {
+      $("main").innerHTML = `<div class="time" id="time">${remaining}</div><div class="single">${s.name}<small${s.knee ? ' class="cue knee"' : ""}>${s.cue}</small></div>`;
+      $("mainBtn").firstElementChild.textContent = running ? "Pausa" : "Riprendi";
+    } else if (s.ramp) {
+      $("main").innerHTML = `<div class="ex">${s.lift.name}</div><div class="scheme">${s.lift.sets} serie × ${s.lift.lo}–${s.lift.hi} · obiettivo ${fmtW(weightFor(s.lift))} kg</div><div class="cue">${s.cue}</div><div class="cue">Senza timer: quando sei pronto vai avanti.</div>`;
+      $("mainBtn").firstElementChild.textContent = "Pronto";
+    } else {
+      const L = s.lift, done = (log[L.id] || []).length;
+      const pips = Array.from({ length: L.sets }, (_, i) => `<i class="${i < done ? "done" : ""}"></i>`).join("");
+      const lastW = store.weights[L.id], sugg = store.suggest[L.id];
+      const hint = sugg != null && sugg !== lastW ? `Ultima volta ${fmtW(lastW)} kg, tutte le serie al massimo: oggi prova ${fmtW(sugg)}.` : lastW != null ? `Ultima volta: ${fmtW(lastW)} kg.` : "Prima volta: il peso è una stima, correggilo.";
+      $("main").innerHTML = `
+        <div class="ex">${L.name}</div>
+        <div class="scheme">Serie ${s.set} di ${L.sets} · ${L.lo}–${L.hi} ripetizioni</div>
+        <div class="cue">${L.cue}</div>
+        ${L.knee ? `<div class="cue knee">${L.knee}</div>` : ""}
+        <div class="set"><span>Fatte</span><span class="pips">${pips}</span></div>
+        <div class="steppers">
+          ${L.inc ? `<div class="stepper"><span class="k">Peso</span><button class="step" data-w="-1" aria-label="Meno peso">−</button><div class="v" id="wv">${fmtW(curW)}<small>kg</small></div><button class="step" data-w="1" aria-label="Più peso">+</button></div>` : `<div class="stepper"><span class="k">Carico</span><div class="v" style="grid-column:1/-1">corpo</div></div>`}
+          <div class="stepper"><span class="k">Ripetizioni</span><button class="step" data-r="-1" aria-label="Meno ripetizioni">−</button><div class="v" id="rv">${curR}</div><button class="step" data-r="1" aria-label="Più ripetizioni">+</button></div>
+        </div>
+        <div class="last">${L.inc ? hint : "Segna solo le ripetizioni pulite."}</div>`;
+      $("mainBtn").firstElementChild.textContent = "Serie fatta";
+      $("main").querySelectorAll("[data-w]").forEach(b => b.addEventListener("click", () => { curW = Math.max(0, curW + (+b.dataset.w) * L.inc); $("wv").innerHTML = `${fmtW(curW)}<small>kg</small>`; }));
+      $("main").querySelectorAll("[data-r]").forEach(b => b.addEventListener("click", () => { curR = Math.max(0, curR + (+b.dataset.r)); $("rv").textContent = curR; }));
+    }
+  }
+
+  let ctx;
+  function beep(freq, len, when = 0) {
+    if (!sound) return;
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "square"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, ctx.currentTime + when);
+      g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + when + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + when + len);
+      o.connect(g).connect(ctx.destination);
+      o.start(ctx.currentTime + when); o.stop(ctx.currentTime + when + len + 0.05);
+    } catch (e) {}
+  }
+  const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+  let lock = null;
+  async function keepAwake() { try { if ("wakeLock" in navigator) lock = await navigator.wakeLock.request("screen"); } catch (e) {} }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && $("session").classList.contains("active")) keepAwake(); });
+
+  function startSegment(i) {
+    cancelAnimationFrame(tick); running = false;
+    idx = Math.max(0, Math.min(i, plan.length - 1));
+    const s = plan[idx];
+    if (s.dur) { remaining = s.dur; endAt = Date.now() + remaining * 1000; lastBeep = -1; running = true; render(); loop(); }
+    else {
+      if (s.set) {
+        const prev = (log[s.lift.id] || []);
+        curW = prev.length ? prev[prev.length - 1].w : weightFor(s.lift);
+        curR = prev.length ? prev[prev.length - 1].r : s.lift.hi;
+      }
+      render();
+    }
+  }
+  function loop() {
+    if (!running) return;
+    const r = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+    if (r !== remaining) {
+      remaining = r; const t = $("time"); if (t) t.textContent = remaining;
+      if (remaining <= 3 && remaining > 0 && lastBeep !== remaining) {
+        lastBeep = remaining; beep(660, 0.12); buzz(60);
+        if (t) { t.classList.remove("last"); void t.offsetWidth; t.classList.add("last"); }
+      }
+      if (remaining === 0) {
+        if (idx + 1 >= plan.length) return finish();
+        beep(plan[idx + 1].type === "rest" ? 440 : 990, 0.35); buzz([120, 60, 120]);
+        return startSegment(idx + 1);
+      }
+    }
+    tick = requestAnimationFrame(loop);
+  }
+  function pause() { running = false; cancelAnimationFrame(tick); render(); }
+  function resume() { running = true; endAt = Date.now() + remaining * 1000; render(); loop(); }
+
+  function completeSet() {
+    const s = plan[idx], L = s.lift;
+    (log[L.id] = log[L.id] || []).push({ w: L.inc ? curW : 0, r: curR });
+    beep(880, 0.12); buzz(40);
+    if (idx + 1 >= plan.length) return finish();
+    startSegment(idx + 1);
+  }
+
+  function finish() {
+    running = false; cancelAnimationFrame(tick);
+    document.body.style.setProperty("--bg", "var(--done)"); document.body.style.setProperty("--fg", "var(--paper)");
+    $("session").classList.remove("active"); $("finish").classList.add("active");
+    const D = DAYS[day]; const rows = []; let ups = 0;
+    D.lifts.forEach(L => {
+      const sets = log[L.id] || []; if (!sets.length) return;
+      const w = sets[sets.length - 1].w, allTop = sets.length >= L.sets && sets.every(x => x.r >= L.hi);
+      if (L.inc) {
+        store.weights[L.id] = w;
+        if (allTop) { store.suggest[L.id] = w + L.inc; ups++; } else delete store.suggest[L.id];
+        rows.push(`<div><span>${L.name}</span><span class="${allTop ? "up" : ""}">${fmtW(w)} kg${allTop ? ` → ${fmtW(w + L.inc)}` : ""}</span></div>`);
+      } else rows.push(`<div><span>${L.name}</span><span class="${allTop ? "up" : ""}">${sets.map(x => x.r).join("·")}${allTop ? " ✓" : ""}</span></div>`);
+    });
+    store.last[day] = new Date().toISOString();
+    store.history = [{ day, at: store.last[day], log }, ...store.history].slice(0, 20);
+    save();
+    $("finishTitle").innerHTML = day === "A" ? "Fatto,<br>lunedì." : "Fatto,<br>venerdì.";
+    $("finishText").textContent = ups ? `${ups} ${ups === 1 ? "esercizio sale" : "esercizi salgono"} di peso la prossima volta.` : "Stessi pesi la prossima volta, va bene così.";
+    $("recap").innerHTML = rows.join("") || "<div><span>Nessuna serie segnata.</span></div>";
+    beep(660, 0.15); beep(880, 0.15, 0.18); beep(1100, 0.4, 0.36); buzz([200, 100, 200]);
+    if (lock) { lock.release(); lock = null; }
+  }
+
+  $("startBtn").addEventListener("click", () => {
+    build();
+    $("segments").innerHTML = plan.map(() => "<i></i>").join("");
+    $("intro").hidden = true; $("session").classList.add("active");
+    beep(880, 0.15); keepAwake();
+    startSegment(0);
+  });
+  $("mainBtn").addEventListener("click", () => {
+    const s = plan[idx];
+    if (s.dur) return running ? pause() : resume();
+    if (s.ramp) return startSegment(idx + 1);
+    completeSet();
+  });
+  $("nextBtn").addEventListener("click", () => { if (idx + 1 >= plan.length) return finish(); startSegment(idx + 1); });
+  $("prevBtn").addEventListener("click", () => {
+    const s = plan[idx]; if (s.set && log[s.lift.id] && log[s.lift.id].length >= s.set) log[s.lift.id].pop();
+    startSegment(idx - 1);
+  });
+  $("againBtn").addEventListener("click", () => {
+    $("finish").classList.remove("active"); $("intro").hidden = false;
+    document.body.style.setProperty("--bg", "var(--paper)"); document.body.style.setProperty("--fg", "var(--ink)");
+    renderIntro();
+  });
+  document.addEventListener("keydown", e => {
+    if (!$("session").classList.contains("active")) return;
+    if (e.key === " " || e.key === "Enter") { e.preventDefault(); $("mainBtn").click(); }
+    if (e.key === "ArrowRight") $("nextBtn").click();
+    if (e.key === "ArrowLeft") $("prevBtn").click();
+  });
+  renderIntro();
+})();
+</script>
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
+</body>
+</html>
