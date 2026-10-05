@@ -28,6 +28,7 @@
   :root[data-theme="dark"] { --ink: #F2EFE6; --paper: #141412; --mute: #A7A399; --line: #F2EFE6; --done: #F2EFE6; color-scheme: dark; }
   html { height: 100%; }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body { margin: 0; height: 100%; font-family: var(--font); background: var(--bg); color: var(--fg); transition: background .45s ease, color .45s ease; -webkit-font-smoothing: antialiased; overflow: hidden; }
   @media (prefers-reduced-motion: reduce) { body { transition: none; } * { animation: none !important; } }
   .app { height: 100%; display: flex; flex-direction: column; max-width: 560px; margin: 0 auto; padding-block: 16px; padding-inline: 20px; }
