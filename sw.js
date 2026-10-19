@@ -1,4 +1,4 @@
-const CACHE = "forza-v6";
+const CACHE = "forza-v7";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./splash-375x667@2.png", "./splash-375x812@3.png", "./splash-390x844@3.png", "./splash-393x852@3.png", "./splash-402x874@3.png", "./splash-414x896@2.png", "./splash-414x896@3.png", "./splash-428x926@3.png", "./splash-430x932@3.png", "./splash-440x956@3.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== CACHE).map(x => caches.delete(x))))); self.clients.claim(); });
