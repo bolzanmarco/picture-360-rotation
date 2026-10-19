@@ -127,7 +127,7 @@
   .btn { font-weight: 800; border: none; border-radius: 999px; padding: 18px 22px; font-size: 20px; width: 100%; background: var(--ink); color: var(--paper); letter-spacing: -.01em; transition: transform .15s var(--ease); }
   .btn:active { transform: scale(.98); }
   .btn.ghost { background: transparent; color: inherit; border: 2px solid currentColor; }
-  .bottom { position: sticky; bottom: 0; z-index: 2; margin: auto -20px 0; padding: 14px 20px calc(var(--sab) + 16px); display: grid; gap: 10px; background: linear-gradient(to top, var(--bg) 72%, transparent); transition: background .5s var(--ease); }
+  .bottom { position: sticky; bottom: 0; z-index: 2; margin: auto -20px 0; padding: 14px 20px max(calc(var(--sab) + 6px), 16px); display: grid; gap: 10px; background: linear-gradient(to top, var(--bg) 72%, transparent); transition: background .5s var(--ease); }
 
   /* sessione live */
   .segments { display: flex; gap: 2px; height: 6px; }
@@ -369,7 +369,7 @@
         </button>`; }).join("")}
       </div>
       ${store.demo ? `<span class="demo">Storico di esempio · azzera dalle impostazioni</span>` : ""}
-      <div class="bottom"><button class="btn ghost" id="hist">Storico esercizi</button></div>`;
+      <div class="bottom"><button class="btn" id="hist">Storico esercizi</button></div>`;
     el.querySelectorAll("[data-day]").forEach(b => b.addEventListener("click", () => go(e => Session(e, b.dataset.day))));
     $("gear", el).addEventListener("click", () => sheet(Settings));
     $("hist", el).addEventListener("click", () => sheet(HistoryList));
