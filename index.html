@@ -9,9 +9,20 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Forza">
+<meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
+<link rel="apple-touch-startup-image" href="splash-390x844@3.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash-393x852@3.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash-430x932@3.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash-428x926@3.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash-375x812@3.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash-414x896@3.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash-414x896@2.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash-375x667@2.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash-402x874@3.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash-440x956@3.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
 <title>Forza</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap" rel="stylesheet">
@@ -24,39 +35,61 @@
     --font: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
     --ease: cubic-bezier(.2,.8,.2,1);
     padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+    --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
   }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink: #F2EFE6; --paper: #141412; --mute: #A7A399; --card: #1E1D1A; --line: #F2EFE6; --done: #F2EFE6; color-scheme: dark; } }
   :root[data-theme="dark"] { --ink: #F2EFE6; --paper: #141412; --mute: #A7A399; --card: #1E1D1A; --line: #F2EFE6; --done: #F2EFE6; color-scheme: dark; }
-  html { height: 100%; }
+  html { height: 100%; height: 100dvh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  html, body { touch-action: pan-y; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   body { margin: 0; height: 100%; font-family: var(--font); background: var(--bg); color: var(--fg); transition: background .5s var(--ease), color .5s var(--ease); -webkit-font-smoothing: antialiased; overflow: hidden; }
   @media (prefers-reduced-motion: reduce) { body { transition: none; } * { animation: none !important; transition: none !important; } }
-  button { font: inherit; color: inherit; touch-action: manipulation; cursor: pointer; }
+  button { font: inherit; color: inherit; touch-action: manipulation; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  button:active { opacity: .85; }
   button:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
 
   .stage { position: relative; height: 100%; max-width: 560px; margin: 0 auto; overflow: hidden; }
-  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding-block: 16px 20px; padding-inline: 20px; overflow-y: auto; overscroll-behavior: contain; }
-  .screen.in-right { animation: inRight .42s var(--ease) both; }
-  .screen.in-left { animation: inLeft .42s var(--ease) both; }
-  .screen.in-up { animation: inUp .45s var(--ease) both; }
-  .screen.out-left { animation: outLeft .32s var(--ease) both; pointer-events: none; }
-  .screen.out-right { animation: outRight .32s var(--ease) both; pointer-events: none; }
-  .screen.out-down { animation: outDown .32s var(--ease) both; pointer-events: none; }
-  @keyframes inRight { from { transform: translateX(60px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes inLeft { from { transform: translateX(-60px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes inUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes outLeft { to { transform: translateX(-40px); opacity: 0; } }
-  @keyframes outRight { to { transform: translateX(40px); opacity: 0; } }
-  @keyframes outDown { to { transform: translateY(30px); opacity: 0; } }
+  :root { --ios: cubic-bezier(.32,.72,0,1); --push: .48s; }
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding-block: 12px 24px; padding-inline: 20px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; background: var(--bg); will-change: transform; }
+  .screen::after { content: ""; position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity var(--push) var(--ios); }
+  .screen.in-right { animation: pushIn var(--push) var(--ios) both; box-shadow: -8px 0 24px rgba(0,0,0,.18); }
+  .screen.in-left { animation: popIn var(--push) var(--ios) both; }
+  .screen.in-up { animation: inUp var(--push) var(--ios) both; }
+  .screen.out-left { animation: pushBack var(--push) var(--ios) both; pointer-events: none; }
+  .screen.out-left::after { opacity: .18; }
+  .screen.out-right { animation: popOut var(--push) var(--ios) both; pointer-events: none; box-shadow: -8px 0 24px rgba(0,0,0,.18); }
+  .screen.out-down { animation: outDown .38s var(--ios) both; pointer-events: none; }
+  .screen.dragging { animation: none !important; transition: none; }
+  @keyframes pushIn { from { transform: translateX(100%); } to { transform: none; } }
+  @keyframes pushBack { from { transform: none; } to { transform: translateX(-30%); } }
+  @keyframes popIn { from { transform: translateX(-30%); } to { transform: none; } }
+  @keyframes popOut { from { transform: none; } to { transform: translateX(100%); } }
+  @keyframes inUp { from { transform: translateY(100%); } to { transform: none; } }
+  @keyframes outDown { to { transform: translateY(100%); } }
+  /* sheet dal basso */
+  .sheet { position: absolute; inset: 0; z-index: 5; }
+  .sheet .dim { position: absolute; inset: 0; background: rgba(0,0,0,.35); animation: fade .35s var(--ios) both; }
+  .sheet .panel { position: absolute; left: 0; right: 0; bottom: 0; top: max(56px, calc(var(--sat) + 44px)); background: var(--paper); color: var(--ink); border-radius: 22px 22px 0 0; padding: 8px 20px calc(24px + var(--sab)); overflow-y: auto; overscroll-behavior: contain; animation: inUp .5s var(--ios) both; box-shadow: 0 -10px 40px rgba(0,0,0,.25); }
+  .sheet .grab { width: 40px; height: 5px; border-radius: 3px; background: currentColor; opacity: .3; margin: 0 auto 14px; }
+  .sheet.closing .dim { animation: fadeOut .3s var(--ios) both; }
+  .sheet.closing .panel { animation: outDown .36s var(--ios) both; }
+  .sheet.dragging .panel, .sheet.dragging .dim { animation: none !important; }
+  @keyframes fade { from { opacity: 0; } } @keyframes fadeOut { to { opacity: 0; } }
+  /* titolo grande che si compatta scorrendo */
+  .navbar { position: sticky; top: -12px; z-index: 2; margin: -12px -20px 0; padding: 12px 20px 8px; background: color-mix(in srgb, var(--bg) 85%, transparent); -webkit-backdrop-filter: saturate(180%) blur(16px); backdrop-filter: saturate(180%) blur(16px); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 56px; }
+  .navbar .ttl { grid-column: 2; font-weight: 800; font-size: 17px; letter-spacing: -.01em; opacity: 0; transform: translateY(6px); transition: all .25s var(--ios); text-align: center; white-space: nowrap; }
+  .navbar .r { justify-self: end; }
+  .screen.compact .navbar .ttl { opacity: 1; transform: none; }
+  .screen.compact .navbar { border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
 
   .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; opacity: .7; margin: 0; }
   h1 { font-size: clamp(38px, 11vw, 58px); line-height: .92; font-weight: 800; letter-spacing: -.03em; margin: 6px 0 0; font-variation-settings: "opsz" 96; text-wrap: balance; }
   h2 { font-size: clamp(26px, 7.5vw, 34px); line-height: .98; font-weight: 800; letter-spacing: -.025em; margin: 0; text-wrap: balance; }
   p { margin: 0; line-height: 1.4; }
   .topbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 44px; }
-  .back { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; padding: 8px 10px 8px 0; font-weight: 700; font-size: 15px; }
+  .bottom { padding-bottom: 0; }
+  .back { display: inline-flex; align-items: center; gap: 2px; background: none; border: none; padding: 8px 10px 8px 0; font-weight: 600; font-size: 17px; justify-self: start; }
   .back svg { width: 18px; height: 18px; }
   .icon { width: 44px; height: 44px; border-radius: 50%; border: 2px solid currentColor; background: transparent; display: inline-flex; align-items: center; justify-content: center; }
   .icon svg { width: 20px; height: 20px; }
@@ -118,8 +151,8 @@
   .stepper .k { grid-column: 1 / -1; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; opacity: .75; margin: 0 0 2px 4px; }
   .stepper .v { text-align: center; font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
   .stepper .v small { font-size: 13px; font-weight: 600; margin-left: 2px; }
-  .stepper .v.pop { animation: pop .25s var(--ease); }
-  @keyframes pop { 50% { transform: scale(1.12); } }
+  .stepper .v.pop { animation: pop .32s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes pop { 50% { transform: scale(1.14); } }
   .step { font-size: 24px; font-weight: 700; border: none; background: transparent; width: 48px; height: 48px; border-radius: 50%; }
   .step:active { background: currentColor; color: var(--bg); }
   .hint { font-size: 13px; opacity: .75; margin-top: 8px; }
@@ -166,7 +199,7 @@
   .seg { display: inline-flex; border: 2px solid currentColor; border-radius: 999px; overflow: hidden; }
   .seg button { border: none; background: transparent; padding: 8px 12px; font-weight: 700; font-size: 13px; }
   .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--paper); padding: 12px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; opacity: 0; transition: all .3s var(--ease); pointer-events: none; white-space: nowrap; }
+  .toast { position: fixed; left: 50%; bottom: calc(24px + var(--sab)); transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--paper); padding: 12px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; opacity: 0; transition: all .3s var(--ease); pointer-events: none; white-space: nowrap; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .demo { display: inline-block; margin-top: 14px; font-size: 12px; font-weight: 700; padding: 5px 9px; border-radius: 999px; border: 2px solid currentColor; opacity: .7; }
 </style>
@@ -257,16 +290,49 @@
   const bgs = { paper: ["var(--paper)", "var(--ink)"] };
   let current = null;
   function setBg(bg, fg) { document.body.style.setProperty("--bg", bg); document.body.style.setProperty("--fg", fg); }
-  function go(render, dir = "right") {
+  function go(render, dir = "right", onBack) {
     const old = current;
     const el = document.createElement("section");
     el.className = `screen in-${dir}`;
+    el._back = onBack || null;
     render(el);
-    stage.appendChild(el);
+    if (dir === "left" || dir === "down") stage.insertBefore(el, old); else stage.appendChild(el);
     current = el;
-    if (old) { old.className = `screen out-${dir === "right" ? "left" : dir === "left" ? "right" : "down"}`; setTimeout(() => old.remove(), 340); }
+    if (old) { old.className = `screen out-${dir === "right" ? "left" : dir === "left" ? "right" : "down"}`; setTimeout(() => old.remove(), 520); }
+    el.addEventListener("scroll", () => el.classList.toggle("compact", el.scrollTop > 36), { passive: true });
   }
-  const back = (label, fn) => `<button class="back" data-back aria-label="Indietro">${svg("back")}${label}</button>`;
+  const back = (label, title = "") => `<div class="navbar"><button class="back" data-back aria-label="Indietro">${svg("back")}${label}</button><span class="ttl">${title}</span><span class="r" data-navr></span></div>`;
+  function wireBack(el, fn) { el._back = fn; const b = el.querySelector("[data-back]"); if (b) b.addEventListener("click", fn); }
+  // swipe dal bordo sinistro per tornare indietro
+  let sw = null;
+  stage.addEventListener("touchstart", e => { if (!current || !current._back || live) return; const t = e.touches[0]; if (t.clientX > 28) return; sw = { x: t.clientX, y: t.clientY, dx: 0, started: false }; }, { passive: true });
+  stage.addEventListener("touchmove", e => {
+    if (!sw) return; const t = e.touches[0]; sw.dx = Math.max(0, t.clientX - sw.x);
+    if (!sw.started) { if (Math.abs(t.clientY - sw.y) > 12 && sw.dx < 12) { sw = null; return; } if (sw.dx > 10) { sw.started = true; current.classList.add("dragging"); } else return; }
+    current.style.transform = `translateX(${sw.dx}px)`; current.style.boxShadow = "-8px 0 24px rgba(0,0,0,.18)";
+  }, { passive: true });
+  stage.addEventListener("touchend", () => {
+    if (!sw) return; const el = current, d = sw.dx, go_ = sw.started && d > Math.min(120, stage.clientWidth * .3); sw = null;
+    if (!el) return;
+    el.style.transition = "transform .3s var(--ios)";
+    if (go_) { el.style.transform = `translateX(${stage.clientWidth}px)`; const fn = el._back; el._back = null; setTimeout(() => { el.style.transition = ""; fn(); }, 40); }
+    else { el.style.transform = ""; setTimeout(() => { el.style.transition = ""; el.classList.remove("dragging"); el.style.boxShadow = ""; }, 320); }
+  });
+  // foglio dal basso
+  function sheet(render) {
+    const wrap = document.createElement("div"); wrap.className = "sheet";
+    wrap.innerHTML = `<div class="dim"></div><div class="panel"><div class="grab" aria-hidden="true"></div></div>`;
+    const panel = wrap.querySelector(".panel");
+    const close = () => { wrap.classList.add("closing"); setTimeout(() => wrap.remove(), 380); };
+    wrap.querySelector(".dim").addEventListener("click", close);
+    let d0 = null;
+    panel.addEventListener("touchstart", e => { if (panel.scrollTop > 0) return; d0 = { y: e.touches[0].clientY, dy: 0 }; }, { passive: true });
+    panel.addEventListener("touchmove", e => { if (!d0) return; d0.dy = Math.max(0, e.touches[0].clientY - d0.y); if (d0.dy > 4) { wrap.classList.add("dragging"); panel.style.transform = `translateY(${d0.dy}px)`; } }, { passive: true });
+    panel.addEventListener("touchend", () => { if (!d0) return; const dy = d0.dy; d0 = null; if (dy > 120) { panel.style.transition = "transform .3s var(--ios)"; panel.style.transform = "translateY(100%)"; setTimeout(() => wrap.remove(), 300); } else { panel.style.transition = "transform .3s var(--ios)"; panel.style.transform = ""; setTimeout(() => { panel.style.transition = ""; wrap.classList.remove("dragging"); }, 320); } });
+    render(panel, close);
+    stage.appendChild(wrap);
+    return close;
+  }
   const svg = n => ({
     back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
     gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
@@ -287,7 +353,7 @@
     const week = names.map((n, i) => { const done = doneThisWeek.find(x => x.dow === i); const cls = done ? done.day.toLowerCase() : i === 2 ? "run" : ""; return `<div class="${i === dow ? "today" : ""}"><span>${n}</span><i class="${cls}"></i></div>`; }).join("");
     const ups = day => DAYS[day].lifts.filter(L => store.suggest[L.id] != null && store.suggest[L.id] !== store.weights[L.id]).length;
     el.innerHTML = `
-      <div class="topbar"><p class="eyebrow">${today.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}</p><button class="icon" id="gear" aria-label="Impostazioni">${svg("gear")}</button></div>
+      <div class="navbar" style="grid-template-columns:1fr auto"><p class="eyebrow" style="opacity:.7">${today.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}</p><button class="icon r" id="gear" aria-label="Impostazioni" style="width:40px;height:40px">${svg("gear")}</button></div>
       <h1>Forza</h1>
       <p style="margin-top:10px;font-size:16px;max-width:36ch">${weeks} settiman${weeks === 1 ? "a" : "e"} in archivio. Mercoledì corsa, le altre due le fai qui.</p>
       <div class="week" aria-label="Settimana">${week}</div>
@@ -303,8 +369,8 @@
       ${store.demo ? `<span class="demo">Storico di esempio · azzera dalle impostazioni</span>` : ""}
       <div class="bottom"><button class="btn ghost" id="hist">Storico esercizi</button></div>`;
     el.querySelectorAll("[data-day]").forEach(b => b.addEventListener("click", () => go(e => Session(e, b.dataset.day))));
-    $("gear", el).addEventListener("click", () => go(Settings, "up"));
-    $("hist", el).addEventListener("click", () => go(e => HistoryList(e)));
+    $("gear", el).addEventListener("click", () => sheet(Settings));
+    $("hist", el).addEventListener("click", () => sheet(HistoryList));
   }
 
   // ---------- Dettaglio sessione ----------
@@ -313,7 +379,8 @@
     setBg(D.color, D.fg);
     const last = lastOf(day);
     el.innerHTML = `
-      <div class="topbar">${back("Archivio")}<span class="eyebrow">${day} · ${D.label}</span></div>
+      ${back("Archivio", D.name)}
+      <p class="eyebrow" style="margin-top:6px">${day} · ${D.label}</p>
       <h1>${D.name}</h1>
       <p style="margin-top:10px;font-size:15px;opacity:.9">${D.lifts.length} esercizi · circa ${minutes(day)} minuti${last ? ` · ultima volta ${fmtDate(last.at)}, ${last.min} min` : ""}</p>
       <div class="list">
@@ -323,8 +390,8 @@
       </div>
       <div class="note" style="margin-top:16px;background:${D.fg};color:${day === "A" ? "#2B45FF" : "#B5121B"}"><b>Ginocchio sinistro.</b> In piedi resta morbido, mai bloccato indietro. Le righe con la barra a sinistra sono i cue per lui.</div>
       <div class="bottom"><button class="btn" id="start" style="background:${D.fg};color:${day === "A" ? "#2B45FF" : "#B5121B"}">Inizia la seduta</button></div>`;
-    el.querySelector("[data-back]").addEventListener("click", () => go(Home, "left"));
-    el.querySelectorAll("[data-lift]").forEach(b => b.addEventListener("click", () => go(e => History(e, b.dataset.lift, () => go(e2 => Session(e2, day), "left")))));
+    wireBack(el, () => go(Home, "left"));
+    el.querySelectorAll("[data-lift]").forEach(b => b.addEventListener("click", () => { const backFn = () => go(e2 => Session(e2, day), "left"); go(e => History(e, b.dataset.lift, backFn), "right", backFn); }));
     $("start", el).addEventListener("click", () => startLive(day));
   }
 
@@ -463,15 +530,14 @@
   }
 
   // ---------- Storico ----------
-  function HistoryList(el) {
-    setBg("var(--paper)", "var(--ink)");
+  function HistoryList(el, close) {
     const groups = [["A", LIFTS_A], ["B", LIFTS_B]];
-    el.innerHTML = `
-      <div class="topbar">${back("Archivio")}<span class="eyebrow">Storico</span></div>
-      <h1>Esercizi</h1>
-      ${groups.map(([d, L]) => `<p class="eyebrow" style="margin-top:22px">${d} · ${DAYS[d].label}</p><div class="list" style="margin-top:8px">${L.map(x => { const w = store.weights[x.id], s = store.suggest[x.id]; return `<button class="item" data-lift="${x.id}"><span class="n">${svgChart()}</span><div><div class="name">${x.name}</div><div class="meta">${store.history.filter(h => h.log[x.id]).length} sedute</div></div><div class="w ${s != null && s !== w ? "up" : ""}">${x.inc ? (w != null ? fmtW(s ?? w) + "<small>kg</small>" : "—") : "corpo"}${s != null && s !== w ? " ↑" : ""}</div></button>`; }).join("")}</div>`).join("")}`;
-    el.querySelector("[data-back]").addEventListener("click", () => go(Home, "left"));
-    el.querySelectorAll("[data-lift]").forEach(b => b.addEventListener("click", () => go(e => History(e, b.dataset.lift, () => go(HistoryList, "left")))));
+    el.insertAdjacentHTML("beforeend", `
+      <div class="topbar"><h2>Storico esercizi</h2><button class="back" data-close style="padding:8px 0 8px 10px">Chiudi</button></div>`);
+    el.insertAdjacentHTML("beforeend", `
+      ${groups.map(([d, L]) => `<p class="eyebrow" style="margin-top:22px">${d} · ${DAYS[d].label}</p><div class="list" style="margin-top:8px">${L.map(x => { const w = store.weights[x.id], s = store.suggest[x.id]; return `<button class="item" data-lift="${x.id}"><span class="n">${svgChart()}</span><div><div class="name">${x.name}</div><div class="meta">${store.history.filter(h => h.log[x.id]).length} sedute</div></div><div class="w ${s != null && s !== w ? "up" : ""}">${x.inc ? (w != null ? fmtW(s ?? w) + "<small>kg</small>" : "—") : "corpo"}${s != null && s !== w ? " ↑" : ""}</div></button>`; }).join("")}</div>`).join("")}`);
+    el.querySelector("[data-close]").addEventListener("click", close);
+    el.querySelectorAll("[data-lift]").forEach(b => b.addEventListener("click", () => { close(); const backFn = () => go(Home, "left"); go(e => History(e, b.dataset.lift, backFn), "right", backFn); }));
   }
   const svgChart = () => `<span style="display:inline-flex;width:20px;height:20px;opacity:.6">${svg("chart")}</span>`;
   function History(el, id, onBack) {
@@ -486,7 +552,8 @@
     const useReps = !L.inc;
     const rmax = Math.max(...pts.map(p => Math.max(...p.reps)), 1);
     el.innerHTML = `
-      <div class="topbar">${back("Indietro")}<span class="eyebrow">${day} · ${D.label}</span></div>
+      ${back("Indietro", L.name)}
+      <p class="eyebrow" style="margin-top:6px">${day} · ${D.label}</p>
       <h1 style="font-size:clamp(32px,9vw,48px)">${L.name}</h1>
       <p style="margin-top:8px;font-size:15px;opacity:.85">${L.sets} × ${L.lo}–${L.hi}${L.inc ? ` · +${fmtW(L.inc)} kg quando tutte le serie arrivano a ${L.hi}` : " · corpo libero"}</p>
       <div class="stats">
@@ -500,30 +567,32 @@
       <div class="log">${[...pts].reverse().map(p => `<span class="d">${fmtDate(p.at)}</span><span>${L.inc ? fmtW(p.w) + " kg · " : ""}${p.reps.join(" ")}</span><span class="${p.top ? "up" : ""}" style="${p.top ? "" : "opacity:.6"}">${p.top ? "↑ sale" : "tiene"}</span>`).join("")}</div>
       ${L.inc ? `<div class="setrow" style="margin-top:22px;border-top:2px solid currentColor"><div><div class="l">Peso della prossima seduta</div><div class="s">Correggi se la stima non ti torna</div></div><div class="seg"><button data-adj="-1" aria-label="Meno">−</button><button disabled style="font-variant-numeric:tabular-nums" id="adjv">${fmtW(weightFor(L))}</button><button data-adj="1" aria-label="Più">+</button></div></div>` : ""}
       <div style="height:24px"></div>`;
-    el.querySelector("[data-back]").addEventListener("click", onBack);
+    wireBack(el, onBack);
     el.querySelectorAll("[data-adj]").forEach(b => b.addEventListener("click", () => { const v = Math.max(0, weightFor(L) + (+b.dataset.adj) * L.inc); store.suggest[id] = v; save(); $("adjv", el).textContent = fmtW(v); toast(`${L.name}: prossima a ${fmtW(v)} kg`); }));
   }
 
   // ---------- Impostazioni ----------
-  function Settings(el) {
-    setBg("var(--paper)", "var(--ink)");
+  function Settings(el, close) {
     const s = store.settings;
-    el.innerHTML = `
-      <div class="topbar">${back("Archivio")}<span class="eyebrow">Impostazioni</span></div>
-      <h1>Regola</h1>
-      <div style="margin-top:22px">
+    const body = document.createElement("div");
+    el.appendChild(body);
+    const draw = () => { body.innerHTML = `
+      <div class="topbar"><h2>Impostazioni</h2><button class="back" data-close style="padding:8px 0 8px 10px">Chiudi</button></div>
+      <div style="margin-top:16px">
         <div class="setrow"><div><div class="l">Suoni</div><div class="s">Bip negli ultimi 3 secondi e ai cambi</div></div><div class="seg" id="snd"><button data-v="1" aria-pressed="${s.sound}">On</button><button data-v="0" aria-pressed="${!s.sound}">Off</button></div></div>
         <div class="setrow"><div><div class="l">Recuperi</div><div class="s">Se hai poco tempo, accorciali</div></div><div class="seg" id="rst"><button data-v="0.75" aria-pressed="${s.restScale === .75}">−25%</button><button data-v="1" aria-pressed="${s.restScale === 1}">Normali</button><button data-v="1.25" aria-pressed="${s.restScale === 1.25}">+25%</button></div></div>
         <div class="setrow"><div><div class="l">Storico di esempio</div><div class="s">${store.demo ? "Attivo: le tre settimane che vedi sono finte" : "Non attivo: i dati sono tuoi"}</div></div><button class="ctl" style="padding:10px 14px;font-size:14px" id="demo">${store.demo ? "Azzera" : "Carica"}</button></div>
         <div class="setrow"><div><div class="l">Cancella tutto</div><div class="s">Pesi, storico e impostazioni su questo telefono</div></div><button class="ctl" style="padding:10px 14px;font-size:14px" id="wipe">Cancella</button></div>
       </div>
       <p style="margin-top:22px;font-size:13px;opacity:.7;max-width:40ch">Tutto resta sul telefono. Nessun account, nessun server. Prototipo v2 · ottobre 2026.</p>`;
-    el.querySelector("[data-back]").addEventListener("click", () => go(Home, "down"));
-    $("snd", el).querySelectorAll("button").forEach(b => b.addEventListener("click", () => { s.sound = b.dataset.v === "1"; save(); go(Settings, "up"); }));
-    $("rst", el).querySelectorAll("button").forEach(b => b.addEventListener("click", () => { s.restScale = +b.dataset.v; save(); go(Settings, "up"); }));
+    body.querySelector("[data-close]").addEventListener("click", close);
+    $("snd", body).querySelectorAll("button").forEach(b => b.addEventListener("click", () => { s.sound = b.dataset.v === "1"; save(); draw(); }));
+    $("rst", body).querySelectorAll("button").forEach(b => b.addEventListener("click", () => { s.restScale = +b.dataset.v; save(); draw(); }));
     let armed = false;
-    $("wipe", el).addEventListener("click", e => { if (!armed) { armed = true; e.target.textContent = "Sicuro? Tocca ancora"; return; } store = { weights: {}, suggest: {}, history: [], settings: { sound: true, restScale: 1 }, demo: false, seeded: true }; save(); toast("Tutto cancellato"); go(Home, "down"); });
-    $("demo", el).addEventListener("click", () => { if (store.demo) { store.history = []; store.weights = {}; store.suggest = {}; store.demo = false; save(); toast("Storico azzerato"); } else { seedDemo(); toast("Storico di esempio caricato"); } go(Settings, "up"); });
+    $("wipe", body).addEventListener("click", e => { if (!armed) { armed = true; e.target.textContent = "Sicuro? Tocca ancora"; return; } store = { weights: {}, suggest: {}, history: [], settings: { sound: true, restScale: 1 }, demo: false, seeded: true }; save(); toast("Tutto cancellato"); close(); go(Home, "left"); });
+    $("demo", body).addEventListener("click", () => { if (store.demo) { store.history = []; store.weights = {}; store.suggest = {}; store.demo = false; save(); toast("Storico azzerato"); } else { seedDemo(); toast("Storico di esempio caricato"); } draw(); });
+    };
+    draw();
   }
 
   // ---------- Audio, vibrazione, wake lock ----------
