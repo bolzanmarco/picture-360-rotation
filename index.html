@@ -49,11 +49,12 @@
   button:active { opacity: .85; }
   button:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
 
-  .stage { position: relative; height: 100%; max-width: 560px; margin: 0 auto; overflow: hidden; }
+  .stage { position: fixed; inset: 0; height: 100dvh; max-width: 560px; margin: 0 auto; overflow: hidden; }
   :root { --ios: cubic-bezier(.32,.72,0,1); --push: .48s; }
-  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding-block: 0 calc(var(--sab) + 20px); padding-inline: 20px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; background: var(--bg); will-change: transform; }
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding-block: 0; padding-inline: 20px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; background: var(--bg); will-change: transform; }
   .screen > *, .sheet .panel > * { flex-shrink: 0; }
   .screen > :first-child:not(.navbar) { margin-top: calc(var(--sat) + 12px); }
+  .screen > :last-child:not(.bottom) { margin-bottom: calc(var(--sab) + 20px); }
   .screen::after { content: ""; position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity var(--push) var(--ios); }
   .screen.in-right { animation: pushIn var(--push) var(--ios) both; box-shadow: -8px 0 24px rgba(0,0,0,.18); }
   .screen.in-left { animation: popIn var(--push) var(--ios) both; }
@@ -90,7 +91,6 @@
   h2 { font-size: clamp(26px, 7.5vw, 34px); line-height: .98; font-weight: 800; letter-spacing: -.025em; margin: 0; text-wrap: balance; }
   p { margin: 0; line-height: 1.4; }
   .topbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 44px; }
-  .bottom { padding-bottom: 0; }
   .back { display: inline-flex; align-items: center; gap: 2px; background: none; border: none; padding: 8px 10px 8px 0; font-weight: 600; font-size: 17px; justify-self: start; }
   .back svg { width: 18px; height: 18px; }
   .icon { width: 44px; height: 44px; border-radius: 50%; border: 2px solid currentColor; background: transparent; display: inline-flex; align-items: center; justify-content: center; }
@@ -127,7 +127,7 @@
   .btn { font-weight: 800; border: none; border-radius: 999px; padding: 18px 22px; font-size: 20px; width: 100%; background: var(--ink); color: var(--paper); letter-spacing: -.01em; transition: transform .15s var(--ease); }
   .btn:active { transform: scale(.98); }
   .btn.ghost { background: transparent; color: inherit; border: 2px solid currentColor; }
-  .bottom { margin-top: auto; padding-top: 16px; display: grid; gap: 10px; }
+  .bottom { position: sticky; bottom: 0; z-index: 2; margin: auto -20px 0; padding: 14px 20px calc(var(--sab) + 16px); display: grid; gap: 10px; background: linear-gradient(to top, var(--bg) 72%, transparent); transition: background .5s var(--ease); }
 
   /* sessione live */
   .segments { display: flex; gap: 2px; height: 6px; }
