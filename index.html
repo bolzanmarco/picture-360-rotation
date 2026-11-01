@@ -100,7 +100,8 @@
   .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 18px; }
   .week div { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; opacity: .75; }
   .week i { width: 100%; height: 8px; border-radius: 4px; border: 2px solid var(--line); }
-  .week i.a { background: var(--a); border-color: var(--a); } .week i.b { background: var(--b); border-color: var(--b); } .week i.run { background: var(--warm); border-color: var(--warm); }
+  .week i.a { background: var(--a); border-color: var(--a); } .week i.b { background: var(--b); border-color: var(--b); } .week i.run { background: var(--warm); border-color: var(--warm); } .week i.c { background: #2E7D5B; border-color: #2E7D5B; }
+  .daycard.c .bar { background: #2E7D5B; }
   .week .today { opacity: 1; } .week .today span { text-decoration: underline; text-underline-offset: 4px; }
 
   .cards { display: flex; flex-direction: column; gap: 12px; margin-top: 22px; }
@@ -250,9 +251,25 @@
     { id: "row", name: "Rematore con manubrio", sets: 3, lo: 10, hi: 12, inc: 2, rest: 60, start: 22, cue: "Reps per lato, mano e ginocchio sulla panca. Gomito al fianco, 1 s in alto." },
     { id: "pallof", name: "Pallof press al cavo", sets: 3, lo: 10, hi: 12, inc: 2.5, rest: 45, start: 15, cue: "Reps per lato. Cavo al petto, spingi avanti e resisti alla rotazione.", knee: "In piedi, ginocchia morbide, peso al centro del piede." },
   ];
+  // Sessione di mobilità per collo e spalle: lenta, seduti o a quattro zampe, niente supino né a testa in giù. Va bene anche in gravidanza.
+  const NECK = [
+    ["Respiro e spalle", "Seduto, schiena lunga. Inspira e alza le spalle verso le orecchie, espira e lasciale cadere. Dieci volte, lente.", 60],
+    ["Cerchi con le spalle", "Indietro, ampi e lenti. Il collo resta morbido, lo sguardo avanti.", 45],
+    ["Mento al petto", "Mani appoggiate sulla nuca solo come peso, senza tirare. Respira nella parte dietro del collo.", 30],
+    ["Orecchio alla spalla · sinistra", "Inclina la testa a sinistra; la mano destra scende verso il pavimento. Niente strappi.", 30],
+    ["Orecchio alla spalla · destra", "Uguale dall'altro lato. Se tira troppo, riduci.", 30],
+    ["Sguardo all'ascella · sinistra", "Ruota il mento verso l'ascella sinistra, la mano sinistra accompagna piano. È il muscolo del mal di testa.", 30],
+    ["Sguardo all'ascella · destra", "Uguale dall'altro lato. Respiro lungo.", 30],
+    ["Gatto e mucca", "A quattro zampe: espira e inarca la schiena verso l'alto, inspira e apri il petto. Ogni respiro un movimento.", 60],
+    ["Apertura del petto", "Seduto, mani dietro la testa: gomiti che si aprono e il petto che sale, poi si chiudono. Dieci volte.", 45],
+    ["Rotazioni del torace", "Seduto, mani sulle spalle: ruota il busto a destra e a sinistra, la testa segue. Lente.", 45],
+    ["Doppio mento", "Spingi la testa indietro come per fare il doppio mento, tieni 5 secondi, rilascia. Dieci volte.", 60],
+    ["Spalle giù, respiro", "Occhi chiusi. Inspira 4 secondi, espira 6. Le spalle scendono a ogni espiro.", 60],
+  ];
   const DAYS = {
     A: { name: "Gambe e spinta", dow: 1, label: "Lunedì", warm: WARM_A, lifts: LIFTS_A, color: "var(--a)", fg: "#F2EFE6" },
     B: { name: "Catena posteriore e tirata", dow: 5, label: "Venerdì", warm: WARM_B, lifts: LIFTS_B, color: "var(--b)", fg: "#F2EFE6" },
+    C: { name: "Collo e spalle", dow: null, label: "Quando serve", warm: NECK, lifts: [], color: "#2E7D5B", fg: "#F2EFE6", mobility: true },
   };
 
   // ---------- Stato ----------
@@ -359,10 +376,15 @@
     el.innerHTML = `
       <div class="navbar" style="grid-template-columns:1fr auto"><p class="eyebrow" style="opacity:.7">${today.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}</p><button class="icon r" id="gear" aria-label="Impostazioni" style="width:40px;height:40px">${svg("gear")}</button></div>
       <h1>Forza</h1>
-      <p style="margin-top:10px;font-size:16px;max-width:36ch">${weeks} settiman${weeks === 1 ? "a" : "e"} in archivio. Mercoledì corsa, le altre due le fai qui.</p>
+      <p style="margin-top:10px;font-size:16px;max-width:36ch">${weeks} settiman${weeks === 1 ? "a" : "e"} in archivio. Mercoledì corsa, le altre due le fai qui. La C è per quando il collo tira.</p>
       <div class="week" aria-label="Settimana">${week}</div>
       <div class="cards">
-        ${["A", "B"].map(d => { const D = DAYS[d], last = lastOf(d), u = ups(d); return `
+        ${["A", "B", "C"].map(d => { const D = DAYS[d], last = lastOf(d), u = ups(d); if (D.mobility) return `
+        <button class="daycard c" data-day="C"><i class="bar"></i>
+          <header><p class="eyebrow">C · ${D.label}</p><small>${last ? "ultima " + fmtDate(last.at) : "mai fatta"}</small></header>
+          <h2>${D.name}</h2>
+          <p class="sub">Nove minuti di mobilità lenta per collo teso e mal di testa. Seduti, in due, va bene anche in gravidanza.</p>
+        </button>`; return `
         <button class="daycard ${d.toLowerCase()}" data-day="${d}"><i class="bar"></i>
           <header><p class="eyebrow">${d} · ${D.label}</p><small>${last ? "ultima " + fmtDate(last.at) : "mai fatta"}</small></header>
           <h2>${D.name}</h2>
@@ -386,14 +408,15 @@
       ${back("Archivio", D.name)}
       <p class="eyebrow" style="margin-top:6px">${day} · ${D.label}</p>
       <h1>${D.name}</h1>
-      <p style="margin-top:10px;font-size:15px;opacity:.9">${D.lifts.length} esercizi · circa ${minutes(day)} minuti${last ? ` · ultima volta ${fmtDate(last.at)}, ${last.min} min` : ""}</p>
+      <p style="margin-top:10px;font-size:15px;opacity:.9">${D.mobility ? `${D.warm.length} posizioni a tempo, senza pause · ${Math.round(D.warm.reduce((a, w) => a + w[2], 0) / 60)} minuti` : `${D.lifts.length} esercizi · circa ${minutes(day)} minuti`}${last ? ` · ultima volta ${fmtDate(last.at)}, ${last.min} min` : ""}</p>
       <div class="list">
-        <div class="item"><span class="n">00</span><div><div class="name">Riscaldamento</div><div class="meta">${D.warm.length} movimenti a tempo</div></div><div class="w">${Math.round(D.warm.reduce((a, w) => a + w[2], 0) / 60)}<small>min</small></div></div>
+        ${D.mobility ? D.warm.map((w, i) => `<div class="item"><span class="n">${String(i + 1).padStart(2, "0")}</span><div><div class="name">${w[0]}</div><div class="meta">${w[1]}</div></div><div class="w">${w[2]}<small>s</small></div></div>`).join("") : ""}
+        ${D.mobility ? "" : `<div class="item"><span class="n">00</span><div><div class="name">Riscaldamento</div><div class="meta">${D.warm.length} movimenti a tempo</div></div><div class="w">${Math.round(D.warm.reduce((a, w) => a + w[2], 0) / 60)}<small>min</small></div></div>`}
         ${D.lifts.map((L, i) => { const w = weightFor(L), up = store.suggest[L.id] != null && store.suggest[L.id] !== store.weights[L.id]; return `
         <button class="item" data-lift="${L.id}"><span class="n">${String(i + 1).padStart(2, "0")}</span><div><div class="name">${L.name}</div><div class="meta">${L.sets} × ${L.lo}–${L.hi}${L.knee ? " · ginocchio" : ""}</div></div><div class="w ${up ? "up" : ""}">${L.inc ? fmtW(w) + "<small>kg</small>" : "corpo"}${up ? " ↑" : ""}</div></button>`; }).join("")}
       </div>
-      <div class="note" style="margin-top:16px;background:${D.fg};color:${day === "A" ? "#2B45FF" : "#B5121B"}"><b>Ginocchio sinistro.</b> In piedi resta morbido, mai bloccato indietro. Le righe con la barra a sinistra sono i cue per lui.</div>
-      <div class="bottom"><button class="btn" id="start" style="background:${D.fg};color:${day === "A" ? "#2B45FF" : "#B5121B"}">Inizia la seduta</button></div>`;
+      ${D.mobility ? `<div class="note" style="margin-top:16px;background:${D.fg};color:#2E7D5B"><b>Piano, mai forzare.</b> Movimenti piccoli, il dolore non va cercato. Niente supino né a testa in giù: va bene anche al sesto mese. Se il mal di testa non passa in giornata o peggiora, soprattutto in gravidanza, sentite il medico.</div>` : `<div class="note" style="margin-top:16px;background:${D.fg};color:${day === "A" ? "#2B45FF" : "#B5121B"}"><b>Ginocchio sinistro.</b> In piedi resta morbido, mai bloccato indietro. Le righe con la barra a sinistra sono i cue per lui.</div>`}
+      <div class="bottom"><button class="btn" id="start" style="background:${D.fg};color:${day === "A" ? "#2B45FF" : day === "B" ? "#B5121B" : "#2E7D5B"}">${D.mobility ? `Inizia · ${Math.round(D.warm.reduce((a, w) => a + w[2], 0) / 60)} min` : "Inizia la seduta"}</button></div>`;
     wireBack(el, () => go(Home, "left"));
     el.querySelectorAll("[data-lift]").forEach(b => b.addEventListener("click", () => { const backFn = () => go(e2 => Session(e2, day), "left"); go(e => History(e, b.dataset.lift, backFn), "right", backFn); }));
     $("start", el).addEventListener("click", () => startLive(day));
@@ -403,7 +426,7 @@
   let live = null;
   function buildPlan(day) {
     const D = DAYS[day], plan = [];
-    D.warm.forEach(w => plan.push({ type: "warm", phase: "Riscaldamento", name: w[0], cue: w[1], dur: w[2], knee: !!w[3] }));
+    D.warm.forEach((w, i) => plan.push({ type: D.mobility ? "mob" : "warm", phase: D.mobility ? `${i + 1} di ${D.warm.length}` : "Riscaldamento", name: w[0], cue: w[1], dur: w[2], knee: !!w[3] }));
     D.lifts.forEach((L, li) => {
       if (L.ramp) plan.push({ type: "lift", phase: `${li + 1} · ${L.name}`, ramp: true, lift: L, cue: L.ramp });
       for (let s = 1; s <= L.sets; s++) {
@@ -438,7 +461,7 @@
     $("prevBtn", el).addEventListener("click", () => { if (live.idx === 0) return exitLive(); const s = live.plan[live.idx]; if (s.set && live.log[s.lift.id] && live.log[s.lift.id].length >= s.set) live.log[s.lift.id].pop(); startSegment(live.idx - 1); });
   }
   function exitLive() { cancelAnimationFrame(live.tick); live.running = false; const d = live.day; live = null; go(e => Session(e, d), "down"); }
-  const colors = { warm: "var(--warm)", rest: "var(--rest)" }, fgs = { warm: "#101010", rest: "#101010" };
+  const colors = { warm: "var(--warm)", rest: "var(--rest)", mob: "#2E7D5B" }, fgs = { warm: "#101010", rest: "#101010", mob: "#F2EFE6" };
   function renderLive() {
     const el = $("live"); if (!el || !live) return;
     const s = live.plan[live.idx], D = DAYS[live.day];
@@ -521,14 +544,14 @@
   function Finish(el, day, rows, ups, volume, min) {
     setBg("var(--done)", "var(--paper)");
     el.classList.add("finish");
-    const other = day === "A" ? "B" : "A";
+    const other = day === "A" ? "B" : "A"; if (DAYS[day].mobility) el.classList.add("mob");
     el.innerHTML = `
-      <p class="eyebrow" style="margin-top:14px">${DAYS[day].label} · ${min} min</p>
-      <h1>Fatto,<br>${DAYS[day].label.toLowerCase()}.</h1>
-      <p style="margin-top:12px;font-size:17px;font-weight:700">${ups ? `${ups} ${ups === 1 ? "esercizio sale" : "esercizi salgono"} di peso la prossima volta.` : rows.length ? "Stessi pesi la prossima volta, va bene così." : "Nessuna serie segnata."}</p>
+      <p class="eyebrow" style="margin-top:14px">${DAYS[day].mobility ? DAYS[day].name : DAYS[day].label} · ${min} min</p>
+      <h1>${DAYS[day].mobility ? "Collo<br>sciolto." : `Fatto,<br>${DAYS[day].label.toLowerCase()}.`}</h1>
+      <p style="margin-top:12px;font-size:17px;font-weight:700">${DAYS[day].mobility ? "Spalle giù, respiro lungo. Rifatela quando serve, anche due volte al giorno." : ups ? `${ups} ${ups === 1 ? "esercizio sale" : "esercizi salgono"} di peso la prossima volta.` : rows.length ? "Stessi pesi la prossima volta, va bene così." : "Nessuna serie segnata."}</p>
       <div class="recap">${rows.map(({ L, w, sets, allTop }) => `<div><b>${L.name}</b><span>${L.inc ? fmtW(w) + " kg · " : ""}${sets.map(x => x.r).join(" ")}</span><span class="${allTop ? "up" : "keep"}">${allTop ? (L.inc ? `→ ${fmtW(w + L.inc)}` : "✓") : "tiene"}</span></div>`).join("")}</div>
-      <div class="tiles"><div class="tile"><div class="k">Volume</div><div class="v">${Math.round(volume).toLocaleString("it-IT")} <small>kg</small></div></div><div class="tile"><div class="k">Sedute ${day}</div><div class="v">${store.history.filter(h => h.day === day).length}</div></div></div>
-      <p style="margin-top:16px;font-size:14px;opacity:.85">Prossima: ${day === "A" ? "mercoledì corsa facile, venerdì cartella B" : "lunedì cartella A"}${store.suggest[DAYS[other].lifts[0].id] ? `. ${DAYS[other].lifts[0].name} a ${fmtW(store.suggest[DAYS[other].lifts[0].id])}` : ""}.</p>
+      <div class="tiles">${DAYS[day].mobility ? "" : `<div class="tile"><div class="k">Volume</div><div class="v">${Math.round(volume).toLocaleString("it-IT")} <small>kg</small></div></div>`}<div class="tile"><div class="k">${DAYS[day].mobility ? "Volte" : "Sedute " + day}</div><div class="v">${store.history.filter(h => h.day === day).length}</div></div></div>
+      ${DAYS[day].mobility ? "" : `<p style="margin-top:16px;font-size:14px;opacity:.85">Prossima: ${day === "A" ? "mercoledì corsa facile, venerdì cartella B" : "lunedì cartella A"}${store.suggest[DAYS[other].lifts[0].id] ? `. ${DAYS[other].lifts[0].name} a ${fmtW(store.suggest[DAYS[other].lifts[0].id])}` : ""}.</p>`}
       <div class="bottom"><button class="btn" id="home" style="background:var(--paper);color:var(--ink)">Torna all'archivio</button></div>`;
     $("home", el).addEventListener("click", () => go(Home, "down"));
   }
