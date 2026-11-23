@@ -205,6 +205,9 @@
   .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
   .toast { position: fixed; left: 50%; bottom: calc(24px + var(--sab)); transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--paper); padding: 12px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; opacity: 0; transition: all .3s var(--ease); pointer-events: none; white-space: nowrap; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .banner { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-top: 16px; padding: 12px 14px; border-radius: 14px; border: 2px solid currentColor; font-size: 14px; line-height: 1.35; }
+  .banner b { font-weight: 800; } .banner .mini { font-size: 12px; opacity: .75; margin-top: 2px; }
+  .chip { border: 2px solid currentColor; background: transparent; color: inherit; border-radius: 999px; padding: 9px 14px; font-weight: 700; font-size: 14px; }
   .demo { display: inline-block; margin-top: 14px; font-size: 12px; font-weight: 700; padding: 5px 9px; border-radius: 999px; border: 2px solid currentColor; opacity: .7; }
 </style>
 </head>
@@ -266,11 +269,52 @@
     ["Doppio mento", "Spingi la testa indietro come per fare il doppio mento, tieni 5 secondi, rilascia. Dieci volte.", 60],
     ["Spalle giù, respiro", "Occhi chiusi. Inspira 4 secondi, espira 6. Le spalle scendono a ogni espiro.", 60],
   ];
-  const DAYS = {
-    A: { name: "Gambe e spinta", dow: 1, label: "Lunedì", warm: WARM_A, lifts: LIFTS_A, color: "var(--a)", fg: "#F2EFE6" },
-    B: { name: "Catena posteriore e tirata", dow: 5, label: "Venerdì", warm: WARM_B, lifts: LIFTS_B, color: "var(--b)", fg: "#F2EFE6" },
-    C: { name: "Collo e spalle", dow: null, label: "Quando serve", warm: NECK, lifts: [], color: "#2E7D5B", fg: "#F2EFE6", mobility: true },
+  // Ciclo 2 (dicembre–gennaio): stessi fondamentali con schema nuovo, accessori ruotati. "from" eredita il peso dal ciclo 1.
+  const LIFTS_A2 = [
+    { id: "squat5", name: "Back squat", sets: 5, lo: 3, hi: 5, inc: 2.5, rest: 150, start: 60, from: "squat", fromScale: 1.04, cue: "Stesso squat, meno ripetizioni e più peso. Parti dal carico con cui chiudevi 4×6 e sali di 2,5 ogni volta che fai 5 in tutte le serie.", knee: "In alto fermati con le ginocchia leggermente piegate. Peso sul centro del piede.", ramp: "Prima: bilanciere vuoto ×8, poi 50% ×5, poi 75% ×3, poi 90% ×1." },
+    { id: "nordic", name: "Nordic curl eccentrico", sets: 3, lo: 4, hi: 6, inc: 0, rest: 90, start: 0, cue: "Caviglie bloccate, corpo dritto. Scendi in 4–5 s, risali aiutandoti con le mani. Passa al lunedì: così i femorali li alleni freschi.", knee: "A 6 lente, rallenta ancora la discesa invece di aggiungere ripetizioni." },
+    { id: "bench8", name: "Panca piana", sets: 3, lo: 8, hi: 10, inc: 2.5, rest: 120, start: 45, from: "bench", fromScale: 0.85, cue: "Schema da 8–10: circa l'85% del peso che usavi per 6. Scapole strette, la sbarra tocca il petto.", ramp: "Prima: bilanciere vuoto ×8, poi 60% ×5." },
+    { id: "dip", name: "Dip alle parallele", sets: 3, lo: 6, hi: 10, inc: 2.5, rest: 90, start: 0, cue: "Peso = zavorra. Scendi finché il braccio è a 90°, busto leggermente avanti. Se non arrivi a 6, usa l'elastico o la macchina assistita e scrivi 0." },
+    { id: "dbshoulder", name: "Shoulder press seduto con manubri", sets: 3, lo: 8, hi: 10, inc: 2, rest: 90, start: 14, from: "ohp", cue: "Seduto con schienale: la schiena resta appoggiata, niente inarcamento. Spingi sopra la testa, scapole giù." },
+    { id: "calfseat", name: "Polpacci seduti", sets: 3, lo: 12, hi: 15, inc: 5, rest: 45, start: 30, cue: "Seduto, lavora il soleo: discesa lenta, 2 s di tenuta in alto.", knee: "Il soleo aiuta a controllare la tibia sotto il ginocchio." },
+  ];
+  const LIFTS_B2 = [
+    { id: "rdl8", name: "Stacco rumeno", sets: 3, lo: 8, hi: 10, inc: 2.5, rest: 120, start: 60, from: "rdl", fromScale: 0.85, cue: "Schema da 8–10: circa l'85% del peso che usavi per 8. Anche indietro, schiena lunga, 3 s in discesa.", knee: "Ginocchia appena piegate e ferme. In alto chiudi coi glutei.", ramp: "Prima: bilanciere vuoto ×8, poi 60% ×5." },
+    { id: "invrow", name: "Trazioni orizzontali", sets: 3, lo: 8, hi: 12, inc: 0, rest: 90, start: 0, cue: "Sbarra bassa al rack, corpo dritto, petto alla sbarra. Più i piedi sono avanti, più è dura: regola così la progressione." },
+    { id: "row", name: "Rematore con manubrio", sets: 3, lo: 10, hi: 12, inc: 2, rest: 60, start: 22, cue: "Mano e ginocchio sulla panca. Gomito al fianco, 1 s in alto stringendo la scapola: è l'esercizio per la scapola sinistra. Reps per lato." },
+    { id: "legcurl12", name: "Leg curl sdraiato", sets: 3, lo: 10, hi: 12, inc: 2.5, rest: 75, start: 30, from: "legcurl", fromScale: 0.85, cue: "Prono, bacino giù. 3 s nel ritorno, pausa in chiusura.", knee: "La forza che tiene il ginocchio sinistro. Se cede prima, ultima serie solo con lei." },
+    { id: "facepull", name: "Face pull al cavo", sets: 3, lo: 12, hi: 15, inc: 2.5, rest: 45, start: 15, cue: "Corda all'altezza del viso, tira verso le orecchie aprendo i gomiti. Spalle dietro: serve a scapola e collo." },
+    { id: "carry", name: "Suitcase carry", sets: 2, lo: 30, hi: 40, inc: 2, rest: 45, start: 20, cue: "Un manubrio solo, cammina dritto senza inclinarti. Le ripetizioni sono i metri: 30–40 per lato.", knee: "Passo normale, ginocchia morbide." },
+  ];
+  const WARM_C2 = [
+    ["Bike o vogatore", "Ritmo facile, 2 minuti.", 120],
+    ["Gatto e mucca", "A quattro zampe, un respiro per movimento. Scioglie il dorso prima dei carichi.", 40],
+    ["Rotazioni toraciche · sinistra", "A quattro zampe, mano sinistra dietro la nuca: gomito verso il cielo, poi verso la mano a terra. Lente.", 30],
+    ["Rotazioni toraciche · destra", "Uguale dall'altro lato.", 30],
+    ["Pull-apart con elastico", "Elastico davanti al petto, aprilo stringendo le scapole. Per la scapola sinistra.", 40],
+    ["Hamstring walkout", "Dal ponte, cammina coi talloni avanti e indietro.", 40, true],
+    ["Squat a corpo libero", "Lento, 3 s in discesa. In alto fermati prima di bloccare le ginocchia.", 40, true],
+  ];
+  const COOL_C2 = [
+    ["Femorali seduto", "Gamba tesa, busto che scende con la schiena lunga. Respira, 40 s per lato alternando.", 45],
+    ["Flessori dell'anca in ginocchio", "Un ginocchio a terra, bacino avanti, glutei contratti. 25 s per lato.", 50],
+    ["Pettorale al montante", "Avambraccio sul montante, gomito all'altezza della spalla, ruota il busto via. 25 s per lato.", 50],
+    ["Child pose con braccia lunghe", "Seduto sui talloni, braccia avanti, fronte a terra. Le scapole si allontanano.", 45],
+    ["Respiro diaframmatico", "Supino, ginocchia piegate, una mano sulla pancia. Inspira 4 s gonfiando la pancia, espira 6 s. Scioglie la tensione dell'addome.", 90],
+  ];
+  const CYCLES = {
+    1: { label: "Ciclo 1 · ottobre–novembre", A: { name: "Gambe e spinta", lifts: LIFTS_A }, B: { name: "Catena posteriore e tirata", lifts: LIFTS_B } },
+    2: { label: "Ciclo 2 · dicembre–gennaio", A: { name: "Gambe e spinta", lifts: LIFTS_A2, warm: WARM_C2, cool: COOL_C2 }, B: { name: "Catena posteriore e tirata", lifts: LIFTS_B2, warm: WARM_C2, cool: COOL_C2 } },
   };
+  let DAYS;
+  function buildDays() {
+    const c = CYCLES[store.cycle || 1];
+    DAYS = {
+      A: { name: c.A.name, dow: 1, label: "Lunedì", warm: c.A.warm || WARM_A, cool: c.A.cool || [], lifts: c.A.lifts, color: "var(--a)", fg: "#F2EFE6" },
+      B: { name: c.B.name, dow: 5, label: "Venerdì", warm: c.B.warm || WARM_B, cool: c.B.cool || [], lifts: c.B.lifts, color: "var(--b)", fg: "#F2EFE6" },
+      C: { name: "Collo e spalle", dow: null, label: "Quando serve", warm: NECK, lifts: [], color: "#2E7D5B", fg: "#F2EFE6", mobility: true },
+    };
+  }
 
   // ---------- Stato ----------
   const KEY = "forza-v2";
@@ -295,14 +339,19 @@
     store.demo = true; save();
   }
   if (!store.history.length && !store.seeded) { seedDemo(); store.seeded = true; save(); }
+  store.cycle = store.cycle || 1; buildDays();
+  function setCycle(n) { store.cycle = n; store.suggest = {}; store.cycleStart = new Date().toISOString(); save(); buildDays(); }
+  // il ciclo 1 scade dopo 8 settimane dalla prima seduta registrata, o comunque il 1° dicembre
+  const cycleDue = () => { if (store.cycle !== 1) return false; const first = store.history.length ? new Date(store.history[store.history.length - 1].at) : null; const by = new Date(2026, 11, 1); const eight = first ? new Date(first.getTime() + 56 * 864e5) : by; return new Date() >= (eight < by ? eight : by); };
+  const stalled = () => DAYS.A.lifts.concat(DAYS.B.lifts).filter(L => L.inc && store.history.filter(h => h.log[L.id]).slice(0, 3).length === 3 && store.history.filter(h => h.log[L.id]).slice(0, 3).every(h => { const s = h.log[L.id]; return s.length < L.sets || !s.every(x => x.r >= L.hi); }) && new Set(store.history.filter(h => h.log[L.id]).slice(0, 3).map(h => h.log[L.id][0].w)).size === 1).map(L => L.name);
 
-  const allLifts = [...LIFTS_A, ...LIFTS_B];
+  const allLifts = [...LIFTS_A, ...LIFTS_B, ...LIFTS_A2, ...LIFTS_B2];
   const liftById = id => allLifts.find(l => l.id === id);
-  const weightFor = L => store.suggest[L.id] ?? store.weights[L.id] ?? L.start;
+  const weightFor = L => store.suggest[L.id] ?? store.weights[L.id] ?? (L.from && store.weights[L.from] != null ? Math.round(store.weights[L.from] * (L.fromScale || 1) / 2.5) * 2.5 : L.start);
   const fmtW = w => (Math.round(w * 4) / 4).toString().replace(".", ",");
   const fmtDate = iso => new Date(iso).toLocaleDateString("it-IT", { day: "numeric", month: "short" });
   const lastOf = day => store.history.find(h => h.day === day);
-  const minutes = day => { const D = DAYS[day]; let s = D.warm.reduce((a, w) => a + w[2], 0); D.lifts.forEach((L, i) => { s += (L.ramp ? 150 : 0) + L.sets * 45 + (L.sets - 1) * L.rest * store.settings.restScale + (i < D.lifts.length - 1 ? 90 : 0); }); return Math.round(s / 60); };
+  const minutes = day => { const D = DAYS[day]; let s = D.warm.reduce((a, w) => a + w[2], 0) + (D.cool || []).reduce((a, w) => a + w[2], 0); D.lifts.forEach((L, i) => { s += (L.ramp ? 150 : 0) + L.sets * 45 + (L.sets - 1) * L.rest * store.settings.restScale + (i < D.lifts.length - 1 ? 90 : 0); }); return Math.round(s / 60); };
   const suggestedDay = () => { const dow = new Date().getDay(); if (dow === 1 || dow === 2 || dow === 0) return "A"; if (dow === 5 || dow === 6) return "B"; const la = lastOf("A"), lb = lastOf("B"); return (!lb || (la && la.at > lb.at)) ? "B" : "A"; };
 
   // ---------- Router ----------
@@ -376,7 +425,8 @@
     el.innerHTML = `
       <div class="navbar" style="grid-template-columns:1fr auto"><p class="eyebrow" style="opacity:.7">${today.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}</p><button class="icon r" id="gear" aria-label="Impostazioni" style="width:40px;height:40px">${svg("gear")}</button></div>
       <h1>Forza</h1>
-      <p style="margin-top:10px;font-size:16px;max-width:36ch">${weeks} settiman${weeks === 1 ? "a" : "e"} in archivio. Mercoledì corsa, le altre due le fai qui. La C è per quando il collo tira.</p>
+      <p style="margin-top:10px;font-size:16px;max-width:36ch">${weeks} settiman${weeks === 1 ? "a" : "e"} in archivio · ${CYCLES[store.cycle].label.toLowerCase()}. Mercoledì corsa, le altre due le fai qui. La C è per quando il collo tira.</p>
+      ${cycleDue() || stalled().length ? `<div class="banner" style="border-color:var(--a)"><div><b>${cycleDue() ? "Scheda in scadenza." : "Carico fermo: " + stalled().join(", ") + "."}</b><div class="mini">${cycleDue() ? "Otto settimane fatte: è pronta la scheda di dicembre, stessi fondamentali con schema nuovo e accessori ruotati." : "Tre sedute allo stesso peso senza chiudere le ripetizioni: è il segnale per cambiare."}</div></div><button class="chip" id="cyc" style="white-space:nowrap">Vedi</button></div>` : ""}
       <div class="week" aria-label="Settimana">${week}</div>
       <div class="cards">
         ${["A", "B", "C"].map(d => { const D = DAYS[d], last = lastOf(d), u = ups(d); if (D.mobility) return `
@@ -396,6 +446,7 @@
       <div class="bottom"><button class="btn" id="hist">Storico esercizi</button></div>`;
     el.querySelectorAll("[data-day]").forEach(b => b.addEventListener("click", () => go(e => Session(e, b.dataset.day))));
     $("gear", el).addEventListener("click", () => sheet(Settings));
+    const cy = $("cyc", el); if (cy) cy.addEventListener("click", () => sheet(CycleSheet));
     $("hist", el).addEventListener("click", () => sheet(HistoryList));
   }
 
@@ -414,6 +465,7 @@
         ${D.mobility ? "" : `<div class="item"><span class="n">00</span><div><div class="name">Riscaldamento</div><div class="meta">${D.warm.length} movimenti a tempo</div></div><div class="w">${Math.round(D.warm.reduce((a, w) => a + w[2], 0) / 60)}<small>min</small></div></div>`}
         ${D.lifts.map((L, i) => { const w = weightFor(L), up = store.suggest[L.id] != null && store.suggest[L.id] !== store.weights[L.id]; return `
         <button class="item" data-lift="${L.id}"><span class="n">${String(i + 1).padStart(2, "0")}</span><div><div class="name">${L.name}</div><div class="meta">${L.sets} × ${L.lo}–${L.hi}${L.knee ? " · ginocchio" : ""}</div></div><div class="w ${up ? "up" : ""}">${L.inc ? fmtW(w) + "<small>kg</small>" : "corpo"}${up ? " ↑" : ""}</div></button>`; }).join("")}
+        ${D.cool && D.cool.length ? `<div class="item"><span class="n">${String(D.lifts.length + 1).padStart(2, "0")}</span><div><div class="name">Defaticamento</div><div class="meta">${D.cool.length} allungamenti a tempo · pettorale, scapole, anche, respiro</div></div><div class="w">${Math.round(D.cool.reduce((a, w) => a + w[2], 0) / 60)}<small>min</small></div></div>` : ""}
       </div>
       ${D.mobility ? `<div class="note" style="margin-top:16px;background:${D.fg};color:#2E7D5B"><b>Piano, mai forzare.</b> Movimenti piccoli, il dolore non va cercato. Niente supino né a testa in giù: va bene anche al sesto mese. Se il mal di testa non passa in giornata o peggiora, soprattutto in gravidanza, sentite il medico.</div>` : `<div class="note" style="margin-top:16px;background:${D.fg};color:${day === "A" ? "#2B45FF" : "#B5121B"}"><b>Ginocchio sinistro.</b> In piedi resta morbido, mai bloccato indietro. Le righe con la barra a sinistra sono i cue per lui.</div>`}
       <div class="bottom"><button class="btn" id="start" style="background:${D.fg};color:${day === "A" ? "#2B45FF" : day === "B" ? "#B5121B" : "#2E7D5B"}">${D.mobility ? `Inizia · ${Math.round(D.warm.reduce((a, w) => a + w[2], 0) / 60)} min` : "Inizia la seduta"}</button></div>`;
@@ -436,6 +488,7 @@
         if (rest > 0) plan.push({ type: "rest", phase: isLast ? "Cambio esercizio" : L.name, name: "Recupero", cue: isLast ? `Prepara: ${nextL.name}.` : `Poi serie ${s + 1} di ${L.sets}.`, dur: rest });
       }
     });
+    (D.cool || []).forEach(w => plan.push({ type: "cool", phase: "Defaticamento", name: w[0], cue: w[1], dur: w[2] }));
     return plan;
   }
   function startLive(day) {
@@ -461,7 +514,7 @@
     $("prevBtn", el).addEventListener("click", () => { if (live.idx === 0) return exitLive(); const s = live.plan[live.idx]; if (s.set && live.log[s.lift.id] && live.log[s.lift.id].length >= s.set) live.log[s.lift.id].pop(); startSegment(live.idx - 1); });
   }
   function exitLive() { cancelAnimationFrame(live.tick); live.running = false; const d = live.day; live = null; go(e => Session(e, d), "down"); }
-  const colors = { warm: "var(--warm)", rest: "var(--rest)", mob: "#2E7D5B" }, fgs = { warm: "#101010", rest: "#101010", mob: "#F2EFE6" };
+  const colors = { warm: "var(--warm)", rest: "var(--rest)", mob: "#2E7D5B", cool: "#F4B6C2" }, fgs = { warm: "#101010", rest: "#101010", mob: "#F2EFE6", cool: "#101010" };
   function renderLive() {
     const el = $("live"); if (!el || !live) return;
     const s = live.plan[live.idx], D = DAYS[live.day];
@@ -558,7 +611,7 @@
 
   // ---------- Storico ----------
   function HistoryList(el, close) {
-    const groups = [["A", LIFTS_A], ["B", LIFTS_B]];
+    const groups = [["A", DAYS.A.lifts], ["B", DAYS.B.lifts]];
     el.insertAdjacentHTML("beforeend", `
       <div class="topbar"><h2>Storico esercizi</h2><button class="back" data-close style="padding:8px 0 8px 10px">Chiudi</button></div>`);
     el.insertAdjacentHTML("beforeend", `
@@ -568,7 +621,7 @@
   }
   const svgChart = () => `<span style="display:inline-flex;width:20px;height:20px;opacity:.6">${svg("chart")}</span>`;
   function History(el, id, onBack) {
-    const L = liftById(id); const day = LIFTS_A.includes(L) ? "A" : "B"; const D = DAYS[day];
+    const L = liftById(id); const day = LIFTS_A.includes(L) || LIFTS_A2.includes(L) ? "A" : "B"; const D = DAYS[day];
     setBg("var(--paper)", "var(--ink)");
     const sessions = store.history.filter(h => h.log[id]).slice(0, 8).reverse();
     const pts = sessions.map(h => ({ at: h.at, w: h.log[id][h.log[id].length - 1].w, reps: h.log[id].map(x => x.r), top: h.log[id].length >= L.sets && h.log[id].every(x => x.r >= L.hi) }));
@@ -599,6 +652,18 @@
   }
 
   // ---------- Impostazioni ----------
+  function CycleSheet(el, close) {
+    const cur = store.cycle, nxt = cur === 1 ? 2 : 1, N = CYCLES[nxt];
+    const row = (L) => `<div class="item"><span class="n">${L.from ? "=" : "+"}</span><div><div class="name">${L.name}</div><div class="meta">${L.sets} × ${L.lo}–${L.hi} · rec. ${L.rest} s${L.from ? " · peso ereditato" : L.inc ? "" : " · corpo"}</div></div><div class="w">${L.inc ? fmtW(weightFor(L)) + "<small>kg</small>" : ""}</div></div>`;
+    el.insertAdjacentHTML("beforeend", `<div class="topbar"><h2>${N.label}</h2><button class="back" data-close style="padding:8px 0 8px 10px">Chiudi</button></div>
+      <p style="margin-top:8px;font-size:14px;line-height:1.4;opacity:.85">${nxt === 2 ? "Stessi tre fondamentali con schema nuovo: squat a 5×3–5 per la forza, panca e stacco a 3×8–10 con un peso più basso per far crescere le ripetizioni. Accessori ruotati e pensati per scapola sinistra e schiena: nordic al lunedì, dip, shoulder press seduto, trazioni orizzontali, rematore, leg curl sdraiato, face pull, carry. Niente bulgarian: il sabato in gravel copre il lavoro a una gamba. Riscaldamento con dorso e scapole, defaticamento di 5 minuti con respiro per l'addome. I pesi vengono ereditati dal ciclo 1." : "Torni alla scheda di ottobre: i pesi che avevi restano salvati."}</p>
+      <p class="eyebrow" style="margin-top:18px">A · Lunedì</p><div class="list" style="margin-top:6px">${N.A.lifts.map(row).join("")}</div>
+      <p class="eyebrow" style="margin-top:18px">B · Venerdì</p><div class="list" style="margin-top:6px">${N.B.lifts.map(row).join("")}</div>
+      <div class="note" style="margin-top:16px"><b>Prima settimana di scarico.</b> Le prime due sedute del ciclo nuovo falle con i pesi segnati ma fermandoti due ripetizioni prima del limite: servono a imparare lo schema, non a spingere. Dalla terza seduta la progressione riparte da sola.</div>
+      <button class="btn" id="sw" style="margin-top:18px">${nxt === 2 ? "Passa alla scheda di dicembre" : "Torna al ciclo 1"}</button>`);
+    el.querySelector("[data-close]").addEventListener("click", close);
+    $("sw", el).addEventListener("click", () => { setCycle(nxt); toast(nxt === 2 ? "Scheda di dicembre attiva" : "Ciclo 1 attivo"); close(); go(Home, "left"); });
+  }
   function Settings(el, close) {
     const s = store.settings;
     const body = document.createElement("div");
@@ -606,6 +671,7 @@
     const draw = () => { body.innerHTML = `
       <div class="topbar"><h2>Impostazioni</h2><button class="back" data-close style="padding:8px 0 8px 10px">Chiudi</button></div>
       <div style="margin-top:16px">
+        <div class="setrow"><div><div class="l">Scheda</div><div class="s">${CYCLES[store.cycle].label}</div></div><button class="ctl" style="padding:10px 14px;font-size:14px" id="cycbtn">Cambia</button></div>
         <div class="setrow"><div><div class="l">Suoni</div><div class="s">Bip negli ultimi 3 secondi e ai cambi</div></div><div class="seg" id="snd"><button data-v="1" aria-pressed="${s.sound}">On</button><button data-v="0" aria-pressed="${!s.sound}">Off</button></div></div>
         <div class="setrow"><div><div class="l">Recuperi</div><div class="s">Se hai poco tempo, accorciali</div></div><div class="seg" id="rst"><button data-v="0.75" aria-pressed="${s.restScale === .75}">−25%</button><button data-v="1" aria-pressed="${s.restScale === 1}">Normali</button><button data-v="1.25" aria-pressed="${s.restScale === 1.25}">+25%</button></div></div>
         <div class="setrow"><div><div class="l">Storico di esempio</div><div class="s">${store.demo ? "Attivo: le tre settimane che vedi sono finte" : "Non attivo: i dati sono tuoi"}</div></div><button class="ctl" style="padding:10px 14px;font-size:14px" id="demo">${store.demo ? "Azzera" : "Carica"}</button></div>
@@ -613,10 +679,11 @@
       </div>
       <p style="margin-top:22px;font-size:13px;opacity:.7;max-width:40ch">Tutto resta sul telefono. Nessun account, nessun server. Prototipo v2 · ottobre 2026.</p>`;
     body.querySelector("[data-close]").addEventListener("click", close);
+    $("cycbtn", body).addEventListener("click", () => { close(); sheet(CycleSheet); });
     $("snd", body).querySelectorAll("button").forEach(b => b.addEventListener("click", () => { s.sound = b.dataset.v === "1"; save(); draw(); }));
     $("rst", body).querySelectorAll("button").forEach(b => b.addEventListener("click", () => { s.restScale = +b.dataset.v; save(); draw(); }));
     let armed = false;
-    $("wipe", body).addEventListener("click", e => { if (!armed) { armed = true; e.target.textContent = "Sicuro? Tocca ancora"; return; } store = { weights: {}, suggest: {}, history: [], settings: { sound: true, restScale: 1 }, demo: false, seeded: true }; save(); toast("Tutto cancellato"); close(); go(Home, "left"); });
+    $("wipe", body).addEventListener("click", e => { if (!armed) { armed = true; e.target.textContent = "Sicuro? Tocca ancora"; return; } store = { weights: {}, suggest: {}, history: [], settings: { sound: true, restScale: 1 }, demo: false, seeded: true, cycle: 1 }; save(); buildDays(); toast("Tutto cancellato"); close(); go(Home, "left"); });
     $("demo", body).addEventListener("click", () => { if (store.demo) { store.history = []; store.weights = {}; store.suggest = {}; store.demo = false; save(); toast("Storico azzerato"); } else { seedDemo(); toast("Storico di esempio caricato"); } draw(); });
     };
     draw();
